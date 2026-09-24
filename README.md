@@ -1,132 +1,182 @@
-<div align="center">
-  <img src="frontend/public/favicon.svg" alt="Nexus Logo" width="100" />
-  <h1>NEXUS</h1>
-  <p><b>Workforce Intelligence Platform & Enterprise Decision OS</b></p>
-  <p><i>Unifying Employee Intelligence Profiles, Skill Extraction, Internal Mobility, and HR Decision Systems</i></p>
-</div>
+# Nexus — Workforce Intelligence Platform & Decision OS
+
+> An enterprise-grade workforce intelligence operating system that unifies dynamic employee profiles, multi-tier skills matrices, verified technical proficiencies, internal mobility matching, and core workforce operational workflows into a single high-performance platform.
 
 ---
 
-## 🌟 Overview
+## Executive Summary
 
-**Nexus** is an enterprise workforce intelligence platform built on top of a resilient HR decision and workforce management foundation. It transforms static employee directories into dynamic intelligence profiles with multi-tier skills matrices, verified proficiencies, project experience timelines, career aspirations, and organizational knowledge graphs.
+Modern enterprise organizations struggle with talent discovery, skill decay, and disconnected workforce records. Traditional HR Information Systems (HRIS) store static, point-in-time employment records but fail to reflect actual capabilities, evolving project expertise, or employee career trajectories.
 
-Nexus features a state-of-the-art dark-mode glassmorphic interface with reactive UI components, zero layout shifts, and deep role-based workspaces.
-
----
-
-## 🚀 Key Modules & Capabilities
-
-### 1. 🧠 Employee Intelligence Profiles (Phase 1)
-- **Unified Intelligence Persona**: Combines core HR data (department, designation, reporting lines, compensation, shifts) with skill portfolios and technical experience.
-- **Multi-Category Skills Matrix**: Categorized across `BACKEND`, `FRONTEND`, `CLOUD_DEVOPS`, `DATA_AI`, `DATABASE`, `ARCHITECTURE`, `QA_TESTING`, and `SECURITY`.
-- **Skill Verification Engine**: Allows HR and Engineering leads to verify, adjust proficiency levels (`Beginner`, `Intermediate`, `Advanced`, `Expert`), or record endorsements.
-- **Experience & Project Portfolios**: Track high-impact technical initiatives, tech stacks used, team roles, and quantifiable business outcomes.
-- **Career Aspirations & Growth Paths**: Maps employees' target roles, skills of interest, relocation willingness, and preferred work arrangements (Hybrid/Remote/On-site).
-- **Indian Engineering Workforce Benchmark**: Pre-seeded with 45+ comprehensive Indian engineering workforce profiles across Bangalore, Hyderabad, Pune, Gurgaon, Noida, and Chennai.
-
-### 2. 👥 Dynamic Role-Based Workspaces
-5 distinct dashboards tailored to operational organizational responsibilities:
-- **HR Manager Workspace**: Talent directory, skill gap audits, onboarding/offboarding workflows, department structuring.
-- **Standard Employee Portal**: Self-service profile, skill management, leave requests, attendance check-in, payroll view.
-- **Super Admin Dashboard**: Tenant provisioning, RBAC management, system audit logs, enterprise settings.
-- **Finance Executive Hub**: Payroll run approvals, point-in-time salary audits, payslip generation.
-- **IT Administrator Console**: System user management, role assignments, security policies.
-
-### 3. ⏱️ Time, Absence & Attendance
-- Geofenced clock-ins and clock-outs.
-- Automated leave balance snapshots and conflict warnings.
-- Manager approval queues with real-time notifications.
-
-### 4. 💰 Payroll & Compensation Engine
-- Point-in-time salary computation and deduction rules.
-- Automated payslip generation with instant PDF export.
-
-### 5. 🎯 Talent Acquisition & Recruitment Pipeline
-- Kanban applicant tracking with custom interview stages.
-- Automated candidate-to-employee onboarding conversion.
+**Nexus** bridges this operational gap by combining:
+1. **Dynamic Workforce Intelligence**: Deep-tier technical skills matrices, competency verifications, verified project milestones, and career aspiration graphs.
+2. **Comprehensive Workforce Management**: Enterprise RBAC, time & absence management, point-in-time payroll computations, recruitment candidate conversion, and cross-department workflows.
+3. **High-Performance Architecture**: React 18 TypeScript frontend with zero layout-shift dark glassmorphism styling, Node.js micro-modular service layer, MongoDB document store, and Redis-backed caching & rate limiting.
 
 ---
 
-## 🛠 Tech Stack
+## Architecture & System Capabilities
 
-### Frontend
-- **Framework**: React 18 with TypeScript & Vite
-- **Styling**: Vanilla CSS Design System with Glassmorphic tokens (`.glass-panel`, `.glass-cutout`, `.btn-glass`, `.btn-primary`)
-- **Icons & Typography**: Google Material Symbols Outlined & Plus Jakarta Sans / Fira Code
-
-### Backend
-- **Runtime**: Node.js & Express (ES Modules)
-- **Database**: MongoDB with Mongoose ODM
-- **Caching & Rate Limiting**: Upstash Redis / In-Memory fallback
-- **Authentication**: JWT (Access tokens + rotated HTTP-only refresh tokens)
-- **Security**: Argon2/bcrypt password hashing, RBAC middleware, Helmet
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│                             NEXUS PLATFORM                                 │
+├────────────────────────────────────────────────────────────────────────────┤
+│  [ HR Manager ]    [ Employee ]    [ Super Admin ]   [ Finance ]   [ IT ]  │
+│  Directory & Skill  Personal Skill  Tenant & RBAC     Payroll Run   Asset  │
+│  Verification Hub   & Growth Path   Control Plane     Audit Engine  Mgmt   │
+├────────────────────────────────────────────────────────────────────────────┤
+│                       NEXUS INTELLIGENCE LAYER                             │
+│  • Unified Employee Profile (Skills Matrix, Projects, Career Goals)        │
+│  • Multi-Tier Category Mapping (Backend, Frontend, Cloud/DevOps, AI/Data)  │
+│  • Skill Endorsement & Lead Verification Engine                            │
+│  • High-Density Workforce Benchmarks (45+ Indian Engineering Profiles)    │
+├────────────────────────────────────────────────────────────────────────────┤
+│                         CORE WORKFORCE ENGINE                              │
+│  • Dynamic RBAC Middleware (Organization-scoped permissions)               │
+│  • Geofenced Time & Absence Engine with Automated Policy Checkers          │
+│  • Point-in-Time Salary & Payroll Deduction Resolution                     │
+│  • Recruitment Kanban Pipeline & Candidate-to-Hire Conversion              │
+├────────────────────────────────────────────────────────────────────────────┤
+│                       DATA & PERSISTENCE LAYER                             │
+│          MongoDB Document Store  │  Upstash Redis Cache / PubSub           │
+└────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## ⚡ Quick Start Guide
+## Core Feature Modules
+
+### 1. Employee Intelligence Profiles
+- **Unified Profile Persona**: Connects organizational metadata (department, designation, manager hierarchy, base location) with comprehensive technical profiles.
+- **Skills Matrix & Categorization**: Structured taxonomies across `BACKEND`, `FRONTEND`, `CLOUD_DEVOPS`, `DATA_AI`, `DATABASE`, `ARCHITECTURE`, `QA_TESTING`, and `SECURITY`.
+- **Proficiency & Verification Flow**: Proficiency scale (`Beginner`, `Intermediate`, `Advanced`, `Expert`) coupled with Lead / HR verification status badges and direct inline actions.
+- **Project Portfolios & Technology Stacks**: Tracks production responsibilities, tech stacks utilized, impact metrics, and project tenure.
+- **Career Growth & Relocation Preferences**: Captures desired engineering roles, target competencies, and work mode preferences (Hybrid, Remote, On-Site).
+- **Engineering Workforce Dataset**: Pre-populated with 45+ comprehensive engineering profiles spanning major Indian tech hubs (Bangalore, Hyderabad, Pune, Gurgaon, Noida, Chennai).
+
+### 2. Multi-Role Enterprise Workspaces
+- **HR Manager Workspace**: Talent directory, skill auditing, onboarding/offboarding pipelines, team structuring.
+- **Standard Employee Portal**: Self-service profiles, skill additions, leave applications, geo-checkin, salary slips.
+- **Super Admin Workspace**: Organization settings, RBAC definitions, system activity audit logs.
+- **Finance Executive Hub**: Payroll run reviews, deduction configurations, automated payslip distribution.
+- **IT Administrator Console**: User provisioning, role delegations, access policies.
+
+### 3. Time, Absence & Attendance Tracking
+- Geofenced attendance clock-in/out with device telemetry.
+- Automated leave balance snapshots and conflict detection algorithms.
+- Multi-tier manager approval workflows with real-time in-app alerts.
+
+### 4. Payroll & Compensation Architecture
+- Precise point-in-time salary breakdowns (Base, HRA, Allowances, PF, Deductions).
+- Automated payslip batch generation with instant client-side PDF downloads.
+
+### 5. Talent Acquisition & Recruitment Pipeline
+- Interactive Kanban candidate tracking from application review to offer letter.
+- One-click cryptographic invitation generation for new hires.
+
+---
+
+## Technology Stack
+
+| Layer | Technologies | Key Responsibilities |
+|---|---|---|
+| **Frontend** | React 18, TypeScript, Vite | Single-page reactive interface, zero-dependency glassmorphism design tokens, accessible components |
+| **Backend API** | Node.js, Express (ES Modules) | RESTful API layer, micro-modular domain structure, validation pipelines, error handling |
+| **Database** | MongoDB, Mongoose ODM | Multi-tenant schema design, atomic updates, indexes on organization and employee codes |
+| **Security & Auth** | JWT, Argon2 / Bcrypt, Helmet | Short-lived access tokens, rotated HTTP-only refresh tokens, granular RBAC middleware |
+| **Caching & Rate Limit** | Upstash Redis / In-Memory fallback | Session caching, distributed rate limiting, rapid lookup optimization |
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- **Node.js**: v18+ 
-- **MongoDB**: Local MongoDB instance (port `27017`) or MongoDB Atlas URI
+- **Node.js** (v18.0.0 or higher)
+- **npm** (v9.0.0 or higher)
+- **MongoDB** (Local instance running on port `27017` or a remote MongoDB Atlas connection string)
 
-### 1. Clone the repository
+### 1. Repository Setup
 ```bash
 git clone https://github.com/theanshukr/NEXUS.git
 cd NEXUS
 ```
 
-### 2. Backend Setup
+### 2. Backend Installation & Seeding
 ```bash
 cd backend
 npm install
+```
 
-# Configure environment variables (create .env)
-# Ensure MONGO_URI, JWT_SECRET, PORT=5001 are set
+Configure `backend/.env` with your connection parameters:
+```env
+PORT=5001
+NODE_ENV=development
+MONGO_URI=mongodb://127.0.0.1:27017/nexus_db
+JWT_ACCESS_SECRET=your_jwt_access_secret_here
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_here
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+CORS_ORIGIN=http://localhost:5173
+```
 
-# Seed organization, roles, recruitment data, and 45 Indian Engineering Profiles:
+Execute the database seeder to provision the organization, roles, recruitment workflows, and the 45+ Indian engineering intelligence profiles:
+```bash
 node scripts/seedDevMode.js
+```
 
-# Start backend dev server:
+Start the backend server:
+```bash
 npm run dev
 ```
-Backend runs at `http://localhost:5001`.
+*Backend runs on `http://localhost:5001`.*
 
-### 3. Frontend Setup
+### 3. Frontend Installation & Startup
 ```bash
 cd ../frontend
 npm install
 npm run dev
 ```
-Frontend runs at `http://localhost:5173`.
+*Frontend application launches at `http://localhost:5173`.*
 
 ---
 
-## 🧪 Demo Login Credentials
+## Pre-Configured Test Accounts
 
-Run `node scripts/seedDevMode.js` to populate these ready-to-test workspace accounts:
+Use the credentials below to test the platform across different roles:
 
-| Role | Email | Password | Primary Feature Access |
+| Role | Email | Password | Primary Access Scope |
 |---|---|---|---|
 | **HR Manager** | `hr@dev.com` | `Dev@1234` | Full Employee Directory, Intelligence Profiles, Skill Verification |
-| **Standard Employee** | `employee@dev.com` | `Dev@1234` | Personal Intelligence Profile, Skills, Attendance, Leaves |
-| **Super Admin** | `admin@dev.com` | `Dev@1234` | All Modules, RBAC, System Overview |
-| **IT Admin** | `it@dev.com` | `Dev@1234` | User Management, Role Assignments |
-| **Finance Executive** | `finance@dev.com` | `Dev@1234` | Payroll Runs, Salary Structures |
+| **Standard Employee** | `employee@dev.com` | `Dev@1234` | Personal Profile, Skills Portfolio, Attendance, Leave Management |
+| **Super Admin** | `admin@dev.com` | `Dev@1234` | Organization Controls, RBAC Config, Full Platform Access |
+| **Finance Executive** | `finance@dev.com` | `Dev@1234` | Payroll Cycles, Point-in-time Salary Audits |
+| **IT Administrator** | `it@dev.com` | `Dev@1234` | User Provisioning, Access Matrix, Asset Allocations |
 
 ---
 
-## 🗺️ Nexus Platform Roadmap
+## Product Roadmap & Phases
 
-- [x] **Phase 1: Employee Intelligence Profiles** (Unified profiles, skills matrix, experience timeline, career goals, 45+ Indian engineering benchmarks)
-- [ ] **Phase 2: Skill Extraction & Normalization Engine** (Taxonomy mapping, resume/doc parsing, proficiency normalization)
-- [ ] **Phase 3: Workforce Search & Skill-Based Discovery** (Semantic filter, proficiency scoring, location & availability filters)
-- [ ] **Phase 4: Internal Mobility & Intelligent Project Staffing** (Project requirement matching, fit scoring, gap analysis)
-- [ ] **Phase 5: Workforce Analytics & Skill Gap Insights** (Capability heatmaps, critical skill risks, training recommendation matrix)
-- [ ] **Phase 6: Continuous Intelligence Sync & Notifications** (Automated updates on project completion, certification sync)
+- [x] **Phase 1: Employee Intelligence Profiles**
+  - Unified profiles combining HR data with technical skill sets.
+  - Multi-category skills matrix with verified proficiency ratings.
+  - Pre-seeded dataset of 45+ Indian engineering profiles across major technology hubs.
+- [ ] **Phase 2: Skill Extraction & Normalization Engine**
+  - AI-assisted resume & internal document skill parsing.
+  - Automatic taxonomy canonicalization and proficiency scoring.
+- [ ] **Phase 3: Workforce Search & Skill-Based Discovery**
+  - Multi-attribute Boolean & semantic query engine.
+  - Location, proficiency, and bandwidth matching.
+- [ ] **Phase 4: Internal Mobility & Intelligent Project Staffing**
+  - Project requirement specification matching.
+  - Talent fit scoring and team composition simulation.
+- [ ] **Phase 5: Workforce Analytics & Capability Gap Insights**
+  - Organizational capability heatmaps.
+  - Single point of failure (SPOF) risk analysis for critical technologies.
+- [ ] **Phase 6: Continuous Intelligence Sync**
+  - Automated skill refreshes based on completed milestones and certifications.
 
 ---
 
-## 📄 License & Attribution
+## License & Ownership
 
-Internal platform developed for workforce management & workforce intelligence.
+Proprietary enterprise software developed for workforce intelligence and talent operations.
