@@ -1,0 +1,15 @@
+# Netlify Configuration File
+# This file pre-configures build commands and redirects for the single page application (SPA).
+
+[build]
+  # Directory containing the deploy-ready files after building
+  publish = "dist"
+
+  # Command to build the project
+  command = "npm run build"
+
+# Redirect all routing paths to index.html to allow React Router to handle client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

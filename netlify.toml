@@ -1,0 +1,18 @@
+# Netlify Configuration File at Repository Root
+# This tells Netlify to find the frontend directory in the monorepo.
+
+[build]
+  # Base directory of the frontend application inside the repository
+  base = "frontend"
+
+  # Command to build the project (executed within the 'frontend' directory)
+  command = "npm run build"
+
+  # Directory containing the production build files (relative to the base directory)
+  publish = "dist"
+
+# Redirect all routing paths to index.html for Single Page Application (SPA) routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

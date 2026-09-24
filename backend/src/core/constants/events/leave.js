@@ -1,0 +1,4 @@
+export default {
+  APPROVED: 'LEAVE.APPROVED',
+  CANCELLED: 'LEAVE.CANCELLED'
+};

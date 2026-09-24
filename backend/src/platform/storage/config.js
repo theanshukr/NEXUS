@@ -1,0 +1,19 @@
+import env from '#@/config/env.js';
+
+export const STORAGE_CONFIG = {
+  PROVIDER: env.STORAGE_PROVIDER,
+  LOCAL: {
+    PATH: env.LOCAL_STORAGE_PATH,
+  },
+  SUPABASE: {
+    URL: env.SUPABASE_URL,
+    ANON_KEY: env.SUPABASE_ANON_KEY,
+    SECRET_KEY: env.SUPABASE_SECRET_KEY,
+    BUCKET: env.SUPABASE_STORAGE_BUCKET,
+  },
+  LIMITS: {
+    MAX_SIZE_MB: env.MAX_DOCUMENT_SIZE_MB,
+    MAX_SIZE_BYTES: env.MAX_DOCUMENT_SIZE_MB * 1024 * 1024,
+    ALLOWED_MIME_TYPES: env.ALLOWED_DOCUMENT_MIME_TYPES.split(',').map(type => type.trim()),
+  }
+};

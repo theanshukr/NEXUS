@@ -1,0 +1,65 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Production-ready MongoDB + Mongoose + migrate-mongo infrastructure",
+  "main": "src/server.js",
+  "type": "module",
+  "imports": {
+    "#@/*": "./src/*",
+    "#*": "./src/*"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "docs:generate": "node --experimental-vm-modules scripts/docs/generateOpenApi.js",
+    "start": "node src/server.js",
+    "db:create": "migrate-mongo create",
+    "db:up": "migrate-mongo up",
+    "db:down": "migrate-mongo down",
+    "db:status": "migrate-mongo status",
+    "seed:dev": "node scripts/seedDevMode.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:phase1": "vitest run tests/architecture tests/repositories",
+    "test:ai": "vitest run tests/ai-verification"
+  },
+  "keywords": [
+    "mongodb",
+    "mongoose",
+    "migrate-mongo",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.0",
+    "@upstash/redis": "^1.38.0",
+    "axios": "^1.18.1",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "envalid": "^8.2.0",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "helmet": "^8.2.0",
+    "json2csv": "^6.0.0-alpha.2",
+    "jsonwebtoken": "^9.0.3",
+    "luxon": "^3.7.2",
+    "migrate-mongo": "^14.0.7",
+    "mongoose": "^9.7.3",
+    "multer": "^2.2.0",
+    "pino": "^10.3.1",
+    "uuid": "^14.0.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@babel/parser": "^8.0.0",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.9",
+    "mongodb-memory-server": "^11.2.0",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.9",
+    "yaml": "^2.9.0"
+  }
+}

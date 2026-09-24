@@ -1,0 +1,2814 @@
+openapi: 3.1.0
+info:
+  title: Enterprise Workforce Management Platform
+  version: 1.0.0
+paths:
+  /attendance/{id}/resolve-conflict:
+    put:
+      summary: resolveConflict
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /attendance/clock-in:
+    post:
+      summary: Clock In
+      description: Records employee clock-in with GPS coordinates
+      tags:
+        - Attendance
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /attendance/clock-out:
+    post:
+      summary: Clock Out
+      description: Records employee clock-out and finalizes daily attendance
+      tags:
+        - Attendance
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /attendance/today:
+    get:
+      summary: Get Today's Attendance
+      description: Retrieves the current user's attendance record for today
+      tags:
+        - Attendance
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/me:
+    get:
+      summary: Get My Attendance History
+      description: Paginated attendance history for the authenticated employee
+      tags:
+        - Attendance
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/finalize:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /attendance-policies:
+    get:
+      summary: List Attendance Policies
+      description: Returns all attendance policies for the organization
+      tags:
+        - Attendance Policy
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: Create Attendance Policy
+      description: Creates a new attendance policy
+      tags:
+        - Attendance Policy
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /attendance-policies/{id}:
+    get:
+      summary: Get Attendance Policy
+      description: Returns a single attendance policy by ID
+      tags:
+        - Attendance Policy
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    patch:
+      summary: Update Attendance Policy
+      description: Updates an existing attendance policy
+      tags:
+        - Attendance Policy
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /attendance/reconciliation:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/reconciliation/stale:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/reconciliation/payroll-feed:
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/reports:
+    get:
+      summary: getReports
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/dashboard:
+    get:
+      summary: getDashboard
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/export:
+    get:
+      summary: exportReport
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/regularizations:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /attendance/regularizations/{id}/approve:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /attendance/regularizations/{id}/reject:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /auth/login:
+    post:
+      summary: Login User
+      description: Authenticates a user and returns access and refresh tokens.
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /auth/refresh:
+    post:
+      summary: Refresh Session
+      description: Rotates the refresh token and returns a new access token.
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+  /auth/register-invite:
+    post:
+      summary: Register via Invitation
+      description: Redeems an invitation token to create a new user account.
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /auth/logout:
+    post:
+      summary: Logout User
+      description: Revokes the current session and clears the refresh token.
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /auth/me:
+    get:
+      summary: Get Current User
+      description: Returns the currently authenticated user profile and permissions.
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /calendars:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /public/organizations/{slug}/auth/register:
+    post:
+      summary: register
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+  /public/organizations/{slug}/auth/login:
+    post:
+      summary: login
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+  /public/organizations/{slug}/auth/logout:
+    post:
+      summary: logout
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/profile:
+    get:
+      summary: getProfile
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+    put:
+      summary: updateProfile
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                phone:
+                  type: string
+                headline:
+                  type: string
+                summary:
+                  type: string
+                skills:
+                  type: array
+                  items:
+                    type: string
+  /departments:
+    get:
+      summary: getDepartments
+      description: ""
+      tags:
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createDepartment
+      description: ""
+      tags:
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /departments/tree:
+    get:
+      summary: getDepartmentTree
+      description: ""
+      tags:
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /departments/select-options:
+    get:
+      summary: getSelectOptions
+      description: ""
+      tags: &a1
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /departments/options:
+    get:
+      summary: getSelectOptions
+      description: ""
+      tags: *a1
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /departments/{id}:
+    get:
+      summary: getDepartmentById
+      description: ""
+      tags:
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    put:
+      summary: updateDepartment
+      description: ""
+      tags:
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    delete:
+      summary: archiveDepartment
+      description: ""
+      tags:
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /departments/{id}/move:
+    post:
+      summary: moveDepartment
+      description: ""
+      tags:
+        - Department
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /employees:
+    get:
+      summary: getEmployees
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createEmployee
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /employees/org-chart:
+    get:
+      summary: getOrgChart
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /employees/{id}:
+    get:
+      summary: getEmployeeById
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /employees/{id}/profile:
+    patch:
+      summary: updateEmployeeProfile
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /employees/{id}/status:
+    put:
+      summary: changeStatus
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /employees/{id}/manager:
+    put:
+      summary: changeManager
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /employees/{id}/invite:
+    post:
+      summary: inviteEmployee
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /employees/{id}/archive:
+    post:
+      summary: archiveEmployee
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /employees/{id}/restore:
+    post:
+      summary: restoreEmployee
+      description: ""
+      tags:
+        - Employee
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /invites/validate/{token}:
+    get:
+      summary: validateToken
+      description: ""
+      tags:
+        - Invite
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+  /invites:
+    post:
+      summary: createInvite
+      description: ""
+      tags:
+        - Invite
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    get:
+      summary: getInvites
+      description: ""
+      tags:
+        - Invite
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /invites/{id}:
+    delete:
+      summary: revokeInvite
+      description: ""
+      tags:
+        - Invite
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /leave/balances:
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /leave/policies:
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /leave/policies/{code}:
+    put:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+  /leave/reports/utilization:
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /leave/requests:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /leave/requests/{id}/approve:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /leave/requests/{id}/reject:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /leave/requests/{id}/cancel:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /leave/snapshots/run:
+    post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /leave/snapshots:
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /designations:
+    post:
+      summary: createDesignation
+      description: ""
+      tags:
+        - Designation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    get:
+      summary: getDesignations
+      description: ""
+      tags:
+        - Designation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /designations/{id}:
+    get:
+      summary: getDesignationById
+      description: ""
+      tags:
+        - Designation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    patch:
+      summary: updateDesignation
+      description: ""
+      tags:
+        - Designation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /designations/{id}/archive:
+    post:
+      summary: archiveDesignation
+      description: ""
+      tags:
+        - Designation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /locations/{locationId}/holidays/{year}:
+    get:
+      summary: getHolidayCalendar
+      description: ""
+      tags:
+        - HolidayCalendar
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: locationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: string
+    put:
+      summary: createOrUpdateHolidayCalendar
+      description: ""
+      tags:
+        - HolidayCalendar
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: locationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /locations:
+    post:
+      summary: createLocation
+      description: ""
+      tags:
+        - Location
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    get:
+      summary: getLocations
+      description: ""
+      tags:
+        - Location
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /locations/{id}:
+    get:
+      summary: getLocationById
+      description: ""
+      tags:
+        - Location
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    patch:
+      summary: updateLocation
+      description: ""
+      tags:
+        - Location
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /locations/{id}/archive:
+    post:
+      summary: archiveLocation
+      description: ""
+      tags:
+        - Location
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /organizations:
+    post:
+      summary: createOrganization
+      description: ""
+      tags:
+        - Organization
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /organizations/me:
+    get:
+      summary: getMyOrganization
+      description: ""
+      tags:
+        - Organization
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /shifts:
+    post:
+      summary: createShift
+      description: ""
+      tags:
+        - Shift
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    get:
+      summary: getShifts
+      description: ""
+      tags:
+        - Shift
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /shifts/{id}:
+    get:
+      summary: getShiftById
+      description: ""
+      tags:
+        - Shift
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    patch:
+      summary: updateShift
+      description: ""
+      tags:
+        - Shift
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /shifts/{id}/archive:
+    post:
+      summary: archiveShift
+      description: ""
+      tags:
+        - Shift
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /payroll/cycles:
+    post:
+      summary: Create Payroll Cycle
+      description: Creates a new payroll cycle in OPEN state
+      tags:
+        - Payroll Cycle
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cycleIdentifier
+                - cycleStart
+                - cycleEnd
+                - payFrequency
+              properties:
+                cycleIdentifier:
+                  type: string
+                cycleStart:
+                  type: string
+                  format: date-time
+                cycleEnd:
+                  type: string
+                  format: date-time
+                payFrequency:
+                  type: string
+                  enum:
+                    - MONTHLY
+                    - BIWEEKLY
+                    - WEEKLY
+                payDate:
+                  type: string
+                  format: date-time
+                currency:
+                  type: string
+    get:
+      summary: List Payroll Cycles
+      description: Lists payroll cycles with pagination and filtering
+      tags:
+        - Payroll Cycle
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /payroll/cycles/{id}:
+    get:
+      summary: Get Payroll Cycle
+      description: Retrieves payroll cycle by ID
+      tags:
+        - Payroll Cycle
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/cycles/{id}/status:
+    patch:
+      summary: Update Cycle Status
+      description: Updates status of payroll cycle enforcing state machine rules
+      tags:
+        - Payroll Cycle
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - OPEN
+                    - PROCESSING
+                    - COMPLETED
+                    - LOCKED
+  /payroll/runs:
+    post:
+      summary: Execute Payroll Run
+      description: Orchestrates batch calculation and payslip generation for an open
+        payroll cycle
+      tags:
+        - Payroll Run
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payrollCycleId
+              properties:
+                payrollCycleId:
+                  type: string
+    get:
+      summary: List Payroll Runs
+      description: Lists all payroll runs for the organization
+      tags:
+        - Payroll Run
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /payroll/runs/{id}:
+    get:
+      summary: Get Payroll Run
+      description: Retrieves payroll run details and input snapshots
+      tags:
+        - Payroll Run
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/runs/{id}/lock:
+    post:
+      summary: Lock Payroll Run
+      description: Locks completed run, cycle, attendance records, and captures leave
+        snapshots
+      tags:
+        - Payroll Run
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/runs/{id}/finalize-payslips:
+    post:
+      summary: Finalize All Payslips
+      description: Bulk finalizes all payslips in a completed payroll run
+      tags:
+        - Payroll Run
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/payslips/my:
+    get:
+      summary: Get My Payslips
+      description: Lists historical payslips for the authenticated employee
+      tags:
+        - Payslip
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /payroll/payslips/{id}:
+    get:
+      summary: Get Payslip
+      description: Retrieves immutable payslip with embedded snapshots
+      tags:
+        - Payslip
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/payslips/run/{runId}:
+    get:
+      summary: List Run Payslips
+      description: Lists all payslips generated in a specific payroll run
+      tags:
+        - Payslip
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/payslips/employee/{employeeId}:
+    get:
+      summary: List Employee Payslips
+      description: Lists historical payslips for a specific employee
+      tags:
+        - Payslip
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/payslips/{id}/finalize:
+    patch:
+      summary: Finalize Payslip
+      description: Transitions individual payslip from DRAFT to FINALIZED status
+      tags:
+        - Payslip
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /payroll/structures:
+    post:
+      summary: Create Salary Structure
+      description: Creates a versioned salary structure and supersedes existing active
+        structure at target level
+      tags:
+        - Payroll Structure
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - targetType
+                - effectiveFrom
+                - components
+              properties:
+                targetType:
+                  type: string
+                  enum:
+                    - EMPLOYEE
+                    - DESIGNATION
+                    - DEPARTMENT
+                    - ORGANIZATION
+                targetId:
+                  type: string
+                effectiveFrom:
+                  type: string
+                  format: date-time
+                components:
+                  type: array
+                  items:
+                    type: object
+                currency:
+                  type: string
+                roundingRule:
+                  type: string
+    get:
+      summary: List Salary Structures
+      description: Lists salary structures with pagination and filtering
+      tags:
+        - Payroll Structure
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /payroll/structures/{id}:
+    get:
+      summary: Get Salary Structure
+      description: Retrieves salary structure by ID
+      tags:
+        - Payroll Structure
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/requisitions/{requisitionId}/applications:
+    get:
+      summary: getApplicationsForRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requisitionId
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}:
+    get:
+      summary: getApplicationDetails
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/advance:
+    patch:
+      summary: advanceStage
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /applications/{id}/reject:
+    patch:
+      summary: rejectApplication
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /applications/{id}/documents/{documentId}/download:
+    get:
+      summary: downloadCandidateDocument
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/interviews:
+    post:
+      summary: scheduleInterview
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    get:
+      summary: getInterviewsForApplication
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/interviews/{interviewId}:
+    get:
+      summary: getInterview
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interviewId
+          in: path
+          required: true
+          schema:
+            type: string
+    patch:
+      summary: updateInterview
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                interviewType:
+                  type: string
+                  enum:
+                    - ONLINE
+                    - OFFLINE
+                    - PHONE
+                scheduledStart:
+                  type: string
+                  format: date-time
+                scheduledEnd:
+                  type: string
+                  format: date-time
+                timezone:
+                  type: string
+                meetingUrl:
+                  type: string
+                location:
+                  type: string
+                interviewerIds:
+                  type: array
+                  items:
+                    type: string
+    delete:
+      summary: cancelInterview
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interviewId
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/interviews/{interviewId}/evaluate:
+    post:
+      summary: evaluateInterview
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /applications/{id}/offers:
+    post:
+      summary: createOffer
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    get:
+      summary: getOffersForApplication
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/offers/{offerId}:
+    get:
+      summary: getOffer
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/offers/{offerId}/send:
+    patch:
+      summary: sendOffer
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/offers/{offerId}/withdraw:
+    patch:
+      summary: withdrawOffer
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/{id}/hire:
+    post:
+      summary: hireCandidate
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                joiningDate:
+                  type: string
+                  format: date-time
+                shiftId:
+                  type: string
+                departmentId:
+                  type: string
+                managerId:
+                  type: string
+                baseSalary:
+                  type: number
+                targetRoleId:
+                  type: string
+  /public/organizations/{slug}/applications/{slugOrId}:
+    post:
+      summary: apply
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: slugOrId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /public/organizations/{slug}/applications:
+    get:
+      summary: getMyApplications
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/applications/{id}/withdraw:
+    patch:
+      summary: withdrawApplication
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/applications/interviews:
+    get:
+      summary: getCandidateInterviews
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/applications/offers:
+    get:
+      summary: getCandidateOffers
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/applications/offers/{id}/accept:
+    patch:
+      summary: acceptOffer
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/applications/offers/{id}/decline:
+    patch:
+      summary: declineOffer
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/jobs:
+    get:
+      summary: getPublicJobs
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+  /public/organizations/{slug}/jobs/{idOrSlug}:
+    get:
+      summary: getPublicJobByIdOrSlug
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: idOrSlug
+          in: path
+          required: true
+          schema:
+            type: string
+  /requisitions:
+    get:
+      summary: getRequisitions
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /requisitions/{id}:
+    get:
+      summary: getRequisitionById
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    put:
+      summary: updateRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    delete:
+      summary: deleteRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /requisitions/{id}/submit-approval:
+    patch:
+      summary: submitForApproval
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /requisitions/{id}/approve:
+    patch:
+      summary: approveRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /requisitions/{id}/reject:
+    patch:
+      summary: rejectRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /requisitions/{id}/publish:
+    patch:
+      summary: publishRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /requisitions/{id}/close:
+    patch:
+      summary: closeRequisition
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /role-delegation-policies:
+    get:
+      summary: getPolicies
+      description: ""
+      tags:
+        - RoleDelegation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createPolicy
+      description: ""
+      tags:
+        - RoleDelegation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /role-delegation-policies/{id}:
+    delete:
+      summary: deletePolicy
+      description: ""
+      tags:
+        - RoleDelegation
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /roles/system-permissions:
+    get:
+      summary: getSystemPermissions
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /roles:
+    get:
+      summary: getRoles
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createRole
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /roles/{id}:
+    put:
+      summary: updateRole
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    delete:
+      summary: deleteRole
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /roles/{id}/duplicate:
+    post:
+      summary: duplicateRole
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /roles/assign:
+    post:
+      summary: assignRole
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+  /roles/remove:
+    post:
+      summary: removeRole
+      description: ""
+      tags:
+        - Role
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

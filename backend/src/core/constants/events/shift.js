@@ -1,0 +1,5 @@
+export default {
+  CREATED: 'SHIFT.CREATED',
+  UPDATED: 'SHIFT.UPDATED',
+  ARCHIVED: 'SHIFT.ARCHIVED'
+};

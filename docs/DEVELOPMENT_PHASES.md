@@ -1,435 +1,255 @@
-# NEXUS — Development Phases
+# NEXUS — Workforce Intelligence Platform: Development Phases
 
-**Version:** 1.0 | **Status:** Hackathon MVP | **Stack:** FastAPI · React · PostgreSQL · pgvector · LLM API
-
----
-
-## Overview
-
-```
-Phase 1 → Foundation          (Docker · FastAPI · React · Auth)
-Phase 2 → Workforce Data      (Employees · Skills · Projects · Seed)
-Phase 3 → Initiative AI       (LLM Extraction · Normalization)
-Phase 4 → Matching Engine     (Scoring · Semantic · Gaps)
-Phase 5 → Explainability      (Evidence · Explanations · Gap UI)
-Phase 6 → Dashboard           (Metrics · Visualizations)
-Phase 7 → Polish & Demo       (Loading · Errors · E2E Test)
-```
+> **Platform Mission**: *Connect workforce capabilities to the skills required for what's next.*
 
 ---
 
-## Phase 1 — Foundation
+## 🏛️ Guiding Architectural Principles
 
-> **Goal:** Runnable full-stack skeleton with JWT authentication.
+1. **Extend, Don't Replace**: All existing People Flow HR dashboards, directory tables, recruitment pipelines, time & absence trackers, and payroll modules remain 100% active and functional.
+2. **Zero-Duplicate Data**: Nexus intelligence layers build directly upon existing `Employee`, `User`, `Department`, `Project`, and `PerformanceReview` models.
+3. **Modular AI Strategy**: AI extraction and normalization run through pluggable service interfaces (`SkillExtractionService`) with built-in rule/heuristic fallbacks, ensuring high availability even if external AI models are offline.
+4. **Explainable Intelligence**: Skill matches, gap analyses, and recommendations are always accompanied by transparent reasoning for HR decision support.
+5. **Glassmorphic Aesthetic Continuity**: All new Nexus views seamlessly adopt the existing Vanilla CSS glassmorphic design system (`.glass-panel`, `.glass-cutout`, `.btn-glass`).
 
-### Backend Tasks
-- [ ] Initialize FastAPI project (`app/main.py`, CORS, lifespan)
-- [ ] `core/config.py` — load all env vars via Pydantic Settings
-- [ ] `core/database.py` — SQLAlchemy async engine + session factory
-- [ ] `core/security.py` — bcrypt password hashing + JWT sign/verify
-- [ ] `models/user.py` — users table (id, email, password_hash, name, role)
-- [ ] `schemas/auth.py` — LoginRequest, RegisterRequest, TokenResponse
-- [ ] `api/routes/auth.py` — `POST /auth/login`, `POST /auth/register`, `GET /auth/me`
-- [ ] `api/dependencies.py` — `get_current_user` JWT dependency
-- [ ] Alembic init + first migration (users table)
-- [ ] `requirements.txt`
+---
 
-### Frontend Tasks
-- [ ] Vite + React + TypeScript scaffold
-- [ ] Tailwind CSS + base design tokens
-- [ ] `app/providers.tsx` — QueryClient + Auth context
-- [ ] `app/router.tsx` — React Router v6 routes
-- [ ] Login page (`/login`) — email/password form
-- [ ] Auth store (JWT in localStorage + context)
-- [ ] Protected route wrapper (redirect to login if no token)
-- [ ] Base API client (`api/client.ts`) — axios with auth header interceptor
+```mermaid
+graph TD
+    subgraph EXISTING_HR_FOUNDATION ["Existing HR Foundation (Protected)"]
+        REC[Recruitment & ATS]
+        ATT[Attendance & Time]
+        PAY[Payroll & Comp]
+        PERF[Performance & Goals]
+        EMP[Employee Directory]
+    end
 
-### Infrastructure Tasks
-- [ ] `docker-compose.yml` — postgres (pgvector/pgvector:pg16), backend, frontend
-- [ ] `backend/Dockerfile`
-- [ ] `frontend/Dockerfile`
-- [ ] `.env.example` with all required variables
-- [ ] `.gitignore`
+    subgraph NEXUS_INTELLIGENCE_LAYER ["Nexus Intelligence Platform"]
+        P1[Phase 1: Employee Intelligence Profiles]
+        P2[Phase 2: Skill Extraction Pipeline]
+        P3[Phase 3: Skill Normalization & Taxonomy]
+        P4[Phase 4: Workforce Skill Graph]
+        P5[Phase 5: Skill Gap Analysis]
+        P6[Phase 6: Talent Matching Engine]
+        P7[Phase 7: Adaptive Onboarding Agent]
+    end
 
-### ✅ Definition of Done
-```
-docker compose up
-  → Login screen renders
-  → Register a user → Login → JWT stored → /dashboard redirects
+    EMP --> P1
+    REC --> P2
+    P2 --> P3
+    P1 --> P4
+    P3 --> P4
+    PERF --> P4
+    P4 --> P5
+    P4 --> P6
+    P5 --> P7
+    P6 --> P7
 ```
 
 ---
 
-## Phase 2 — Workforce Data
+## 📋 Phase Breakdown
 
-> **Goal:** Employee directory with rich skill profiles visible in the UI.
+### 🔹 Phase 1: Employee Intelligence Profiles
+**Objective**: Transform static employee records into 360° unified intelligence profiles without altering the existing schema or directory tables.
 
-### Backend Tasks
-- [ ] `models/skill.py` — skills table (id, name, category, description, embedding VECTOR)
-- [ ] `models/employee.py` — employees, employee_skills, employee_projects tables
-- [ ] `models/project.py` — projects table
-- [ ] Alembic migrations for all new tables
-- [ ] DB indexes (department, employee_id, skill_id, initiative_id)
-- [ ] `repositories/employees.py` — CRUD + filter by dept/role/skill
-- [ ] `repositories/skills.py` — CRUD + search by name
-- [ ] `services/employee_service.py` — pagination, search, filtering
-- [ ] `services/skill_service.py`
-- [ ] `api/routes/employees.py` — full CRUD + query params
-- [ ] `api/routes/skills.py` — list + create
-- [ ] `scripts/seed.py` — 50–100 employees, 80–150 skills, 30–50 projects, 5–10 initiatives skeleton
+* **Backend Models & Schemas**:
+  - `EmployeeProfileExtended`: One-to-one extension linked to `Employee._id` storing technical & soft skills, past projects, verified certifications, and career aspirations.
+  - Fields:
+    - `skills`: `[{ skillId, name, category, proficiency, yearsOfExp, source, confidence, verificationStatus }]`
+    - `experience`: `[{ title, company, duration, responsibilities, technologies }]`
+    - `projects`: `[{ name, role, description, technologies, startDate, endDate }]`
+    - `certifications`: `[{ name, issuer, issueDate, expiryDate, credentialUrl, verificationStatus }]`
+    - `careerPreferences`: `{ desiredRoles: [], targetSkills: [], interestDomains: [] }`
+* **API Endpoints**:
+  - `GET /api/v1/nexus/employees/:id/profile` — Fetch unified intelligence profile.
+  - `PUT /api/v1/nexus/employees/:id/profile` — Update experience, projects, certifications, and career goals.
+  - `POST /api/v1/nexus/employees/:id/skills` — Add skill with proficiency, source, and initial verification status.
+  - `PATCH /api/v1/nexus/employees/:id/skills/:skillId` — Update skill proficiency or verification state (`VERIFIED`, `REJECTED`, `CONFIRMED`).
+* **Frontend Components & Views**:
+  - Extend [EmployeeManagementView.tsx](file:///d:/Projects/NEXUS/frontend/src/components/EmployeeManagementView.tsx) Profile Modal & Self-Service with tabbed navigation:
+    - **Overview**: Core badges, role, department, tenure, direct reports.
+    - **Skills Matrix**: Visual proficiency meters (Beginner $\rightarrow$ Expert), confidence scores, and verification tags.
+    - **Experience & Projects**: Interactive timeline with tech stack badges.
+    - **Certifications**: Credential preview cards and verification status indicators.
+    - **Career Preferences**: Desired roles and learning goals.
+* **Verification & Acceptance Criteria**:
+  - [ ] Existing Employee Directory search, filter, and onboarding/offboarding remain intact.
+  - [ ] Employee profile displays accurate data from both base `Employee` and extended `EmployeeProfileExtended`.
+  - [ ] Standard Employee and HR Manager roles can view and update skills smoothly.
 
-### Frontend Tasks
-- [ ] `types/employee.ts`, `types/skill.ts`
-- [ ] `api/employees.ts`, `api/skills.ts`
-- [ ] `hooks/useEmployees.ts`, `hooks/useEmployee.ts`
-- [ ] People Directory page (`/employees`) — search + dept/skill filter chips
-- [ ] Employee card component (`EmployeeCard`)
-- [ ] Employee Detail page (`/employees/:id`):
-  - Capability profile with skill progress bars
-  - Project history timeline
-  - Certifications list
-- [ ] Shared `SkillBadge` and `ProficiencyBar` components
+---
 
-### ✅ Definition of Done
-```
-/employees → see all seeded employees
-  → filter by Engineering + Python
-  → click employee → see skills with proficiency bars + project history
+### 🔹 Phase 2: Skill Extraction Pipeline
+**Objective**: Automatically extract candidate and employee skills from unstructured text (resumes, job histories, project descriptions, certifications) with human-in-the-loop verification.
+
+* **Architecture & Service**:
+  - `SkillExtractionService`: Modular service interface with pluggable provider support (Hugging Face / LLM / Regex & Keyword matcher fallback).
+  - Processing flow: `Raw Text` $\rightarrow$ `Entity Recognition / Skill Parsing` $\rightarrow$ `Candidate Skills` $\rightarrow$ `Confidence Scoring` $\rightarrow$ `Human Verification Queue`.
+* **API Endpoints**:
+  - `POST /api/v1/nexus/skills/extract` — Extract skills from raw text or document payload.
+  - `POST /api/v1/nexus/employees/:id/extract-from-text` — Extract and stage candidate skills for an employee.
+  - `POST /api/v1/nexus/employees/:id/skills/confirm-batch` — Batch confirm, edit, or reject staged skills.
+* **Frontend UI**:
+  - Skill Extraction Studio with text/resume parser drawer.
+  - Human Verification Queue with action buttons: `[Confirm]`, `[Edit]`, `[Reject]`.
+  - Confidence percentage badges and highlighted source snippet viewer.
+* **Verification & Acceptance Criteria**:
+  - [ ] AI failure fallback gracefully switches to rule-based keyword extraction or manual entry.
+  - [ ] Extracted skills are flagged as `PENDING_VERIFICATION` until confirmed by HR or manager.
+
+---
+
+### 🔹 Phase 3: Skill Normalization & Taxonomy
+**Objective**: Build a canonical skill taxonomy to eliminate duplicates, aliases, and fragmentation (e.g., merging "React.js", "ReactJS", and "React" into `React`).
+
+* **Backend Models**:
+  - `Skill`:
+    - `canonicalName`: String (Unique, e.g., "React")
+    - `aliases`: `[String]` (e.g., `["React.js", "ReactJS", "React 18"]`)
+    - `category`: Enum (`FRONTEND`, `BACKEND`, `CLOUD_DEVOPS`, `DATA_AI`, `SECURITY`, `MANAGEMENT`, `DESIGN`, `DOMAIN`)
+    - `description`: String
+    - `parentSkill`: ObjectId (ref `Skill`, optional)
+    - `relatedSkills`: `[ObjectId]` (ref `Skill`)
+* **API Endpoints**:
+  - `GET /api/v1/nexus/skills` — Search and retrieve canonical skills and aliases.
+  - `POST /api/v1/nexus/skills` — Create canonical skill definition.
+  - `POST /api/v1/nexus/skills/normalize` — Normalize an arbitrary array of strings into canonical skill IDs.
+* **Frontend UI**:
+  - Interactive Skill Taxonomy Directory with category pills, alias search, and hierarchy tree.
+* **Verification & Acceptance Criteria**:
+  - [ ] Aliased skill inputs automatically resolve to their canonical representation.
+  - [ ] No duplicate skills created in the database.
+
+---
+
+### 🔹 Phase 4: Workforce Skill Graph
+**Objective**: Build multi-dimensional capability relationships connecting employees, skills, proficiencies, departments, and projects into a queryable workforce graph.
+
+* **Relationships Modeled (Relational MongoDB Schema)**:
+  - `Employee` $\longleftrightarrow$ `Skill` (via `EmployeeSkill` with proficiency weight $1-5$)
+  - `Skill` $\longleftrightarrow$ `Project` (via `Project.requiredSkills` / `technologies`)
+  - `Department` $\longleftrightarrow$ `SkillDistribution` (aggregated capability density)
+* **API Endpoints**:
+  - `GET /api/v1/nexus/graph/workforce` — Aggregated workforce capability distribution by department and role.
+  - `GET /api/v1/nexus/graph/skill/:skillId` — Skill node inspection showing certified employees, related skills, and active project dependencies.
+* **Frontend UI**:
+  - Interactive Workforce Skill Graph View (`/nexus/skill-graph`):
+    - Capability matrix heatmap across departments.
+    - Department skill coverage radar charts and depth metrics.
+* **Verification & Acceptance Criteria**:
+  - [ ] Fast indexed aggregation across workforce skills without performance bottlenecks.
+  - [ ] Visual charts accurately reflect verified employee proficiencies.
+
+---
+
+### 🔹 Phase 5: Skill Gap Analysis
+**Objective**: Enable HR and department managers to benchmark required project or departmental capabilities against existing workforce proficiencies to pinpoint gaps.
+
+* **Backend Models**:
+  - `SkillGapAnalysis`:
+    - `targetType`: Enum (`PROJECT`, `ROLE`, `DEPARTMENT`)
+    - `targetId`: ObjectId
+    - `requiredSkills`: `[{ skillId, minProficiency, requiredCount }]`
+    - `results`: `{ available: [], partial: [], missing: [], gapScore: Number }`
+* **API Endpoints**:
+  - `POST /api/v1/nexus/skill-gaps/analyze` — Run instant gap benchmark against a project or role specification.
+  - `GET /api/v1/nexus/skill-gaps/summary` — Company-wide high-risk skill deficits report.
+* **Frontend UI**:
+  - Skill Gap Analysis Studio (`/nexus/skill-gaps`):
+    - Requirement builder (select Project/Role and define required skill proficiencies).
+    - Real-time gap diagnostic cards:
+      - ✅ **Available Capabilities** (fully staffed)
+      - ⚠️ **Partial Capabilities** (proficiency deficit or under-allocated)
+      - ❌ **Missing Capabilities** (zero coverage in organization)
+    - Actionable remediation suggestions (upskill existing staff vs. initiate recruitment requisition).
+* **Verification & Acceptance Criteria**:
+  - [ ] Gap calculation correctly handles multiple employee proficiency levels.
+  - [ ] Instant link to open a recruitment requisition or trigger an upskilling path.
+
+---
+
+### 🔹 Phase 6: Talent Matching Engine
+**Objective**: Provide an explainable decision-support engine that matches employees to projects, open internal roles, and transition paths.
+
+* **Matching Algorithm**:
+  - Weighted multi-criteria scoring:
+    - Skill Match Score ($45\%$)
+    - Proficiency Depth Score ($25\%$)
+    - Experience & Project History ($15\%$)
+    - Availability / Current Capacity ($15\%$)
+* **API Endpoints**:
+  - `POST /api/v1/nexus/talent/match` — Match candidates/employees to project requirements with detailed explainability breakdown.
+* **Frontend UI**:
+  - Talent Matching Hub (`/nexus/talent-matching`):
+    - Interactive candidate ranked cards with match percentage.
+    - Match Explanation Accordion (Strong Matches, Partial Overlaps, Gaps, and "Why Surfaced" summary).
+* **Verification & Acceptance Criteria**:
+  - [ ] Transparent scoring rationale displayed for every matched employee.
+  - [ ] No automated autonomous decisions — clear decision-support UI for managers.
+
+---
+
+### 🔹 Phase 7: Adaptive Onboarding Agent
+**Objective**: Generate personalized, milestone-driven onboarding roadmaps tailored to an employee's existing skill baseline and their target role requirements.
+
+* **Backend Models**:
+  - `OnboardingJourney`:
+    - `employeeId`: ObjectId (ref `Employee`)
+    - `role`: String
+    - `departmentId`: ObjectId (ref `Department`)
+    - `baselineSkills`: `[ObjectId]`
+    - `targetSkills`: `[ObjectId]`
+    - `phases`: `[{ week: Number, title: String, milestones: [{ title, description, priority, dueDate, status, learningResources }] }]`
+    - `overallProgress`: Number
+* **API Endpoints**:
+  - `GET /api/v1/nexus/onboarding/:employeeId` — Fetch tailored onboarding journey.
+  - `POST /api/v1/nexus/onboarding/:employeeId/generate` — Generate adaptive onboarding plan.
+  - `PATCH /api/v1/nexus/onboarding/:employeeId/tasks/:taskId` — Update milestone completion state.
+* **Frontend UI**:
+  - Adaptive Onboarding Journey View (`/nexus/onboarding` and within Employee Profile):
+    - Week-by-week interactive roadmap timeline.
+    - Recommended learning modules and project onboarding checklists.
+    - Real-time progress tracker with animated completion meters.
+* **Verification & Acceptance Criteria**:
+  - [ ] Role-based template fallback functions immediately if AI generation is delayed or offline.
+  - [ ] Progress status persists across user sessions and updates employee status upon full completion.
+
+---
+
+## 🧭 Navigation & UI Integration Plan
+
+The existing top navigation bar will be enhanced with a dedicated **Nexus** intelligence menu pill and sub-route entries:
+
+```text
+Header Navigation
+├── 📊 Dashboard
+├── ⏱️ Time & Absence
+├── 📁 Projects
+├── 📇 Directory (Extended with Nexus Profile Tabs)
+├── 🎧 Help Desk
+├── 🤖 AI Assistant
+└── 🌐 Nexus Intelligence (NEW)
+    ├── 🌟 Skills Taxonomy (/nexus/skills)
+    ├── 🕸️ Workforce Skill Graph (/nexus/skill-graph)
+    ├── ⚠️ Skill Gap Analysis (/nexus/skill-gaps)
+    ├── 🎯 Talent Matching (/nexus/talent-matching)
+    └── 🚀 Adaptive Onboarding (/nexus/onboarding)
 ```
 
 ---
 
-## Phase 3 — Initiative Intelligence
+## 🛡️ Non-Destructive Quality Assurance Checklist
 
-> **Goal:** User describes a business need in plain English → AI extracts structured skills.
+Before concluding any phase, the following regression test suite must be verified:
 
-### Backend Tasks
-- [ ] `models/initiative.py` — initiatives + initiative_skills tables
-- [ ] Alembic migration
-- [ ] `ai/client.py` — LLM API wrapper (OpenAI-compatible)
-- [ ] `ai/prompts.py` — skill extraction prompt template (structured JSON output)
-- [ ] `ai/skill_extractor.py` — call LLM → parse → validate with Pydantic
-- [ ] `ai/skill_normalizer.py` — lowercase → alias lookup → semantic similarity
-- [ ] LLM failure handling (retry × 2 → return partial → manual fallback flag)
-- [ ] `services/initiative_service.py` — create, analyze, store InitiativeSkills
-- [ ] `repositories/initiatives.py`
-- [ ] `api/routes/initiatives.py`:
-  - `POST /initiatives` — create
-  - `GET /initiatives` — list
-  - `GET /initiatives/{id}` — detail
-  - `POST /initiatives/{id}/analyze` — trigger LLM extraction
-
-### LLM Output Schema (Pydantic validated)
-```json
-{
-  "initiative_title": "AI Customer Support Platform",
-  "skills": [
-    { "name": "Generative AI", "importance": 0.95, "required_level": 0.80 },
-    { "name": "Python",        "importance": 0.90, "required_level": 0.80 },
-    { "name": "API Development","importance": 0.80, "required_level": 0.75 }
-  ]
-}
-```
-
-### Frontend Tasks
-- [ ] `types/initiative.ts`
-- [ ] `api/initiatives.ts`
-- [ ] `hooks/useInitiatives.ts`, `hooks/useInitiative.ts`
-- [ ] Create Initiative page (`/initiatives/new`):
-  - Large textarea ("Describe your business initiative…")
-  - Example prompts
-  - "Analyze Initiative" button
-  - Animated progress steps during analysis
-- [ ] Skill Review screen (after AI returns):
-  - List extracted skills with importance level
-  - Edit skills (add / remove / change importance)
-  - "Confirm & Find Talent" button
-- [ ] Error state: "Couldn't analyze → Try Again / Add Skills Manually"
-
-### ✅ Definition of Done
-```
-Enter: "Build an AI customer support platform using LLMs and Salesforce"
-  → Loading animation shows progress steps
-  → Skills appear: Generative AI · Python · API Dev · CRM Integration · Salesforce
-  → User can edit + confirm
-```
-
----
-
-## Phase 4 — Matching Engine
-
-> **Goal:** Employees ranked by fit against initiative requirements with deterministic scores.
-
-### Backend Tasks
-- [ ] `models/match.py` — matches + match_skills tables
-- [ ] Alembic migration
-- [ ] pgvector: generate + store employee capability embeddings on seed
-- [ ] pgvector: generate + store initiative embeddings on analyze
-- [ ] `matching/semantic.py` — cosine similarity retrieval (pgvector)
-- [ ] `matching/skill_matcher.py` — per-skill coverage:
-  - **Direct**: employee has canonical skill
-  - **Transferable**: related skill with partial credit
-  - **Partial**: has skill but below required level
-  - **Missing**: no evidence
-- [ ] `matching/scorer.py` — final weighted score:
-  ```
-  Final = 0.50 × Skill Score
-        + 0.20 × Semantic Score
-        + 0.15 × Experience Score
-        + 0.15 × Evidence Score
-  ```
-- [ ] `matching/gap_analyzer.py` — per-skill org status: Covered / Partial / Missing
-- [ ] `services/matching_service.py` — orchestrate full pipeline
-- [ ] `api/routes/matching.py`:
-  - `POST /initiatives/{id}/match` — run engine + store results
-  - `GET /initiatives/{id}/matches` — paginated list (`?limit=&minimum_score=&department=`)
-  - `GET /initiatives/{id}/matches/{employee_id}` — single match detail
-  - `GET /initiatives/{id}/gaps` — skill gap analysis
-
-### Frontend Tasks
-- [ ] `types/match.ts`
-- [ ] `api/matching.ts`
-- [ ] `hooks/useInitiativeMatches.ts`, `hooks/useInitiativeGaps.ts`
-- [ ] Initiative Detail page (`/initiatives/:id`):
-  - Capability coverage progress bar
-  - Required skills list (✓ / △ / ○ status)
-  - Ranked talent match cards
-  - Capability Gaps tab
-- [ ] `MatchCard` component (name, score, skill coverage icons, snippet explanation)
-- [ ] Filter bar (department, min score, required skill, experience)
-
-### ✅ Definition of Done
-```
-POST /initiatives/{id}/match (100 employees) → response < 2 seconds
-  → Talent Results: Aarav 91% · Priya 86% · Rahul 79%
-  → Scores are deterministic (run twice → same result)
-  → Gap tab: ✓ Python · ✓ GenAI · △ CRM · ○ Salesforce
-```
-
----
-
-## Phase 5 — Explainability
-
-> **Goal:** Every recommendation has a human-readable explanation backed by evidence.
-
-### Backend Tasks
-- [ ] `ai/explanation_generator.py` — structured match data → LLM → concise explanation
-  - Input: employee, match score, matched/partial/missing skills, evidence list
-  - Constraint: **must not invent evidence absent from structured input**
-- [ ] Generate explanations only for **top N matches** (cost control)
-- [ ] Store explanation in `matches.explanation` field
-- [ ] Evidence linking: `match_skills` → `employee_skills` → `employee_projects`
-
-### Frontend Tasks
-- [ ] Evidence Panel — click a skill on employee profile → see:
-  - Proficiency + confidence level
-  - Supporting projects (name, role, duration)
-  - Evidence source type badge
-- [ ] "Why Nexus matched X" section on Employee Profile and Match Card
-- [ ] Skill coverage breakdown on Match Card:
-  - `✓` Direct match
-  - `△` Partial match (with reason)
-  - `○` Missing
-- [ ] Gap Analysis screen (full page):
-  - **Covered** section (green)
-  - **Partial** section (amber) with required vs available count
-  - **Missing** section (red) with "Required: N · Available: 0"
-  - "View Related Talent" CTA
-
-### ✅ Definition of Done
-```
-Click "Aarav Sharma" match card:
-  → Read: "Aarav matches 5 of 6 required capabilities. Direct evidence in Python,
-           LLM applications and API development from AI Support Bot project."
-  → Click "Generative AI" skill → see evidence panel with project history
-  → Gap tab: Salesforce Architecture → Missing (Required: 1 · Available: 0)
-```
-
----
-
-## Phase 6 — Dashboard
-
-> **Goal:** Organization-wide capability intelligence at a glance.
-
-### Backend Tasks
-- [ ] `services/dashboard_service.py` — aggregate queries:
-  - Total employees, total skills tracked
-  - Active initiatives count + coverage %
-  - Critical gaps (Missing status skills across all active initiatives)
-  - Top skills by employee count
-- [ ] `api/routes/dashboard.py`:
-  - `GET /dashboard/overview` — metric cards data
-  - `GET /dashboard/skills` — skill distribution
-  - `GET /dashboard/gaps` — org-wide critical gaps
-  - `GET /dashboard/initiatives` — active initiatives summary
-- [ ] Response time target: < 500ms
-
-### Frontend Tasks
-- [ ] Dashboard page (`/dashboard`):
-  - Metric cards (Employees · Skills · Active Initiatives · Critical Gaps)
-  - Active Initiatives list (name + coverage bar)
-  - Critical Skill Gaps panel (clickable → initiative)
-  - "+ New Initiative" primary CTA
-- [ ] `MetricCard` component with trend indicator
-- [ ] `CapabilityBar` component (coverage %)
-- [ ] `ActiveInitiativeRow` component
-- [ ] `GapBadge` component (Covered / Partial / Missing)
-
-### ✅ Definition of Done
-```
-/dashboard → loads in < 500ms
-  → Shows: 87 Employees · 143 Skills · 8 Initiatives · 3 Critical Gaps
-  → Active initiatives list with coverage bars
-  → Click critical gap → navigates to initiative gaps tab
-```
-
----
-
-## Phase 7 — Polish & Demo Prep
-
-> **Goal:** Demo-ready. Judges are wowed. No rough edges.
-
-### UX Polish
-- [ ] Animated loading states for all async operations:
-  - AI analysis: multi-step progress (`✓ Understanding → ✓ Identifying → ● Mapping → ○ Preparing`)
-  - Matching: `Searching workforce… Comparing skills… Calculating matches…`
-- [ ] Empty states (no employees, no matches, no initiatives)
-- [ ] "No Strong Matches" state → always show gap analysis instead of blank
-- [ ] Error boundaries + graceful API error messages
-- [ ] Responsive layout (desktop-first, tablet-usable, sidebar → top nav on mobile)
-- [ ] Skeleton loaders on data-heavy pages
-
-### Performance
-- [ ] Cache skill embeddings (don't regenerate on every call)
-- [ ] Cache initiative embeddings
-- [ ] Generate LLM explanations for top 5 matches only (AI cost control)
-- [ ] Semantic pre-filter: top 20 candidates → structured match → top 10 results
-
-### Demo Hardening
-- [ ] Seed script is idempotent (safe to re-run)
-- [ ] `make seed` / `python -m scripts.seed` reproducibly loads clean demo data
-- [ ] All demo initiative examples produce rich, varied talent results
-- [ ] End-to-end test: login → create initiative → confirm skills → view matches → view employee → view gaps
-
-### Documentation
-- [ ] `README.md` — setup in < 5 commands
-- [ ] `.env.example` — all vars documented with descriptions
-- [ ] API Swagger accessible at `/docs`
-- [ ] Docker setup verified on clean machine
-
-### ✅ Definition of Done — Hackathon Complete
-```
-docker compose up
-  → Seed loads
-  → Full golden path demo in ~4 minutes:
-      0:00 Dashboard → 0:30 New Initiative → 1:30 AI extracts skills
-      → 2:15 Talent Results → 2:45 Open Aarav → 3:15 Evidence Panel
-      → 3:45 Gap Analysis → 4:15 Closing statement
-  → No backend intervention required during demo
-```
-
----
-
-## Hackathon Priority Order
-
-> Ship in this order if time is limited:
-
-| Priority | Feature | Why |
+| Module | Verification Target | Status |
 |---|---|---|
-| 1 | Employee Dataset | Nothing works without data |
-| 2 | Initiative Creation | Core entry point |
-| 3 | AI Skill Extraction | The AI differentiator |
-| 4 | Skill Matching | Core engine |
-| 5 | Talent Results | Primary output |
-| 6 | Match Explanation | Builds trust |
-| 7 | Gap Analysis | Strategic insight |
-| 8 | Dashboard | Context overview |
-| 9 | UI Polish | Wow factor |
-
----
-
-## Match Score Formula
-
-```
-Final Score  =  0.50 × Skill Score
-             +  0.20 × Semantic Score
-             +  0.15 × Experience Score
-             +  0.15 × Evidence Score
-
-Skill Score  =  Σ(skill_coverage × importance) / Σ(importance)
-coverage     =  min(employee_level / required_level, 1.0)
-
-Evidence Weights:
-  Verified Project Experience   1.00
-  Certification                 0.90
-  Manager / Org Verified        0.90
-  Resume / Profile              0.70
-  Self Declared                 0.50
-```
-
----
-
-## Technical Definition of Done
-
-Complete MVP checklist:
-
-- [ ] PostgreSQL + pgvector running via Docker
-- [ ] Migrations run clean from empty database
-- [ ] Seed data loads in < 30 seconds
-- [ ] FastAPI starts + `/docs` Swagger accessible
-- [ ] React app starts + builds without errors
-- [ ] Auth (register / login / JWT) works end-to-end
-- [ ] Employee + Skill CRUD works
-- [ ] Initiative creation works
-- [ ] LLM skill extraction returns valid Pydantic-validated JSON
-- [ ] Skill normalization works (aliases resolve correctly)
-- [ ] Matching engine returns ranked results < 2s (100 employees)
-- [ ] Match scores are deterministic
-- [ ] LLM explanations generated for top matches
-- [ ] Gap analysis returns Covered / Partial / Missing correctly
-- [ ] Dashboard loads with correct aggregated metrics < 500ms
-- [ ] API errors return standard error schema
-- [ ] End-to-end golden path demo works without manual intervention
-- [ ] No secrets committed to Git
-- [ ] Docker Compose up brings entire stack online
-
----
-
-## API Reference
-
-```
-Auth
-  POST  /api/v1/auth/login
-  POST  /api/v1/auth/register
-  GET   /api/v1/auth/me
-
-Employees
-  GET    /api/v1/employees          ?department=&role=&skill=&search=&page=&limit=
-  GET    /api/v1/employees/{id}
-  POST   /api/v1/employees
-  PATCH  /api/v1/employees/{id}
-  DELETE /api/v1/employees/{id}
-
-Skills
-  GET   /api/v1/skills              ?search=
-  GET   /api/v1/skills/{id}
-  POST  /api/v1/skills
-
-Initiatives
-  GET    /api/v1/initiatives
-  GET    /api/v1/initiatives/{id}
-  POST   /api/v1/initiatives
-  PATCH  /api/v1/initiatives/{id}
-  DELETE /api/v1/initiatives/{id}
-  POST   /api/v1/initiatives/{id}/analyze
-  POST   /api/v1/initiatives/{id}/match
-  GET    /api/v1/initiatives/{id}/matches   ?limit=&minimum_score=&department=
-  GET    /api/v1/initiatives/{id}/matches/{employee_id}
-  GET    /api/v1/initiatives/{id}/gaps
-
-Dashboard
-  GET  /api/v1/dashboard/overview
-  GET  /api/v1/dashboard/skills
-  GET  /api/v1/dashboard/gaps
-  GET  /api/v1/dashboard/initiatives
-```
+| **Authentication** | Login, Token Refresh, Role Switching, Workspace Creation | ✅ Required |
+| **Employee Directory** | List, Search, Filter, Pagination, Archive, Onboarding Modal | ✅ Required |
+| **Time & Absence** | Clock-in/out, GPS check, Leave requests & manager approvals | ✅ Required |
+| **Recruitment / ATS** | Requisitions, Candidate applications, Interview scoring | ✅ Required |
+| **Payroll & Finance** | Cycle view, Payout engine, Payslip generation | ✅ Required |
+| **Performance** | Reviews, Goals, Feedback rating distribution | ✅ Required |
+| **Org Chart** | Dynamic hierarchy rendering | ✅ Required |
+| **Nexus Extension** | No console errors, seamless styling, responsive layout | ✅ Required |
