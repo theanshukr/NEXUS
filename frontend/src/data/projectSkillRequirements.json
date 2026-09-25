@@ -1,0 +1,52 @@
+[
+  {
+    "project_id": "proj_realtime_event_bus",
+    "project_name": "Nexus Real-Time Event Bus",
+    "required_skills": [
+      "Go (Golang)",
+      "Apache Kafka",
+      "Distributed Systems",
+      "Docker"
+    ]
+  },
+  {
+    "project_id": "proj_glassmorphic_design_system",
+    "project_name": "Nexus Glassmorphic Design System",
+    "required_skills": [
+      "React.js",
+      "TypeScript",
+      "Design Systems & CSS Architecture",
+      "CSS3 & Vanilla Styling"
+    ]
+  },
+  {
+    "project_id": "proj_infrastructure_as_code",
+    "project_name": "Nexus Infrastructure As Code",
+    "required_skills": [
+      "Terraform & OpenTofu IaC",
+      "Kubernetes (EKS/GKE)",
+      "CI/CD Pipelines (ArgoCD)",
+      "AWS Cloud Services"
+    ]
+  },
+  {
+    "project_id": "proj_skill_extraction_engine",
+    "project_name": "Nexus Skill Extraction & Match Engine",
+    "required_skills": [
+      "Python",
+      "Hugging Face Transformers",
+      "FastAPI Backend Serving",
+      "Vector Databases (Qdrant/Pinecone)"
+    ]
+  },
+  {
+    "project_id": "proj_platform_architecture_modernization",
+    "project_name": "Nexus Platform Architecture Modernization",
+    "required_skills": [
+      "System Architecture & Design",
+      "Microservices Design Patterns",
+      "Java & Spring Boot",
+      "Engineering Leadership & Mentorship"
+    ]
+  }
+]

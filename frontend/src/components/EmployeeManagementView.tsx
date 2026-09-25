@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useToast } from './ToastProvider';
 import { apiClient } from '../api/client';
 import NexusEmployeeProfileModal from './NexusEmployeeProfileModal';
+import SkillGraph from './SkillGraph/SkillGraph';
 
 interface EmployeeManagementViewProps {
   role: string;
@@ -17,7 +18,17 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
   const [selectedEmployee, setSelectedEmployee] = useState(employees[0]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
+  const [showSkillGraph, setShowSkillGraph] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const filteredEmployees = useMemo(
+    () => employees.filter(emp =>
+      emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.id.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    [employees, searchQuery]
+  );
   const { showToast } = useToast();
 
   // Onboarding invite states
@@ -588,16 +599,6 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
   );
 
   const renderHRManagerView = () => {
-    const filteredEmployees = useMemo(
-      () => employees.filter(emp =>
-        emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.id.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-      [employees, searchQuery]
-    );
-
     return (
     <div className="glass-panel" style={{ padding: '32px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
@@ -608,6 +609,14 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
           Employee Directory
         </h2>
         <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            className="btn btn-primary"
+            style={{ padding: '12px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}
+            onClick={() => setShowSkillGraph(true)}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>hub</span>
+            Skill Graph
+          </button>
           <button
             style={{ padding: '12px 24px', background: '#38bdf8', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 16px rgba(56,189,248,0.4)' }}
             onClick={() => setShowOnboardingModal(true)}
@@ -1084,7 +1093,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
       <div style={{ position: 'absolute', top: '40%', left: '40%', width: '200px', height: '200px', background: 'var(--color-blob-1)', filter: 'blur(80px)', borderRadius: '50%', opacity: 0.1, pointerEvents: 'none', zIndex: 0 }}></div>
       
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <header style={{ marginBottom: '32px' }}>
+        {!(role === 'HR Manager' && showSkillGraph) && <header style={{ marginBottom: '32px' }}>
         <h1 style={{ margin: '0 0 8px 0', fontSize: '32px', letterSpacing: '-1px' }}>
           {role === 'HR Manager' ? 'Directory' : 'Employee Profile'}
         </h1>
@@ -1096,10 +1105,10 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
           {role === 'Super Admin' && 'System-level user metadata and authentication controls.'}
           {role === 'Administrator' && 'Manage hardware and software provisioning.'} {/* Administrator mapped to IT Admin view for now */}
         </p>
-      </header>
+        </header>}
 
       {role === 'Standard Employee' && renderEmployeeSelfService()}
-      {role === 'HR Manager' && renderHRManagerView()}
+      {role === 'HR Manager' && (showSkillGraph ? <SkillGraph onBack={() => setShowSkillGraph(false)} /> : renderHRManagerView())}
       {(role === 'IT Admin' || role === 'Administrator') && renderITAdminView()}
       {role === 'Finance Executive' && renderFinanceView()}
       {role === 'Super Admin' && renderSuperAdminView()}

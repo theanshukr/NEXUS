@@ -1,0 +1,77 @@
+[
+  {
+    "role_id": "role_distributed_systems_architect",
+    "role_name": "Lead Distributed Systems Architect",
+    "required_skills": [
+      "Go (Golang)",
+      "Apache Kafka",
+      "Distributed Systems",
+      "PostgreSQL",
+      "Kubernetes",
+      "gRPC & Protocol Buffers"
+    ]
+  },
+  {
+    "role_id": "role_frontend_architect",
+    "role_name": "Principal Frontend Architect",
+    "required_skills": [
+      "React.js",
+      "TypeScript",
+      "Next.js & SSR",
+      "Design Systems & CSS Architecture",
+      "Web Core Vitals & Performance"
+    ]
+  },
+  {
+    "role_id": "role_devops_lead",
+    "role_name": "Staff Platform & DevOps Lead",
+    "required_skills": [
+      "Kubernetes (EKS/GKE)",
+      "Terraform & OpenTofu IaC",
+      "AWS Cloud Services",
+      "Docker & Containers",
+      "CI/CD Pipelines (ArgoCD)"
+    ]
+  },
+  {
+    "role_id": "role_ai_scientist",
+    "role_name": "Lead AI/ML & GenAI Scientist",
+    "required_skills": [
+      "Python",
+      "PyTorch & Transformers",
+      "Large Language Models (LLMs)",
+      "Vector Databases (Qdrant/Pinecone)",
+      "FastAPI Backend Serving"
+    ]
+  },
+  {
+    "role_id": "role_fullstack_developer",
+    "role_name": "Senior Full Stack Developer",
+    "required_skills": [
+      "Node.js",
+      "React.js",
+      "TypeScript",
+      "MongoDB"
+    ]
+  },
+  {
+    "role_id": "role_data_engineer",
+    "role_name": "Staff Data & Analytics Engineer",
+    "required_skills": [
+      "Apache Spark",
+      "Python",
+      "Snowflake",
+      "dbt"
+    ]
+  },
+  {
+    "role_id": "role_qa_automation_engineer",
+    "role_name": "Lead QA & Automation Engineer",
+    "required_skills": [
+      "Playwright",
+      "Cypress",
+      "API Automation",
+      "k6 Performance Testing"
+    ]
+  }
+]
