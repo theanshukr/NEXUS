@@ -218,11 +218,15 @@ const seedDevMode = async () => {
     await seedNexusIndianWorkforce(org._id);
 
     console.log('✅ Dev Mode Seeding Complete!');
-    process.exit(0);
+    return;
   } catch (error) {
     console.error('❌ Seeding Failed:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
-seedDevMode();
+export { seedDevMode };
+// Only run directly if called from CLI
+if (import.meta.url === `file://${process.argv[1]}`) {
+  seedDevMode().then(() => process.exit(0)).catch(() => process.exit(1));
+}

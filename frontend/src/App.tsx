@@ -29,6 +29,8 @@ const HelpDeskView              = lazy(() => import('./components/HelpDeskView')
 const PerformanceManagementView = lazy(() => import('./components/PerformanceManagementView'));
 const AssetManagementView       = lazy(() => import('./components/AssetManagementView'));
 const ExpenseClaimsView         = lazy(() => import('./components/ExpenseClaimsView'));
+const SkillGraphView            = lazy(() => import('./components/SkillGraphView'));
+const OnboardingView            = lazy(() => import('./components/OnboardingView'));
 
 // ─── Suspense skeleton fallback ───────────────────────────────────────────────
 function PageSkeleton() {
@@ -339,8 +341,8 @@ function App() {
             <div style={{ position: 'relative' }} ref={moreMenuRef}>
               <button 
                 onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-                className={`btn btn-glass ${['org-chart', 'payroll', 'performance', 'assets', 'documents', 'recruitment', 'expenses'].includes(viewType) ? 'active' : ''}`}
-                style={{ width: '38px', height: '38px', padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: ['org-chart', 'payroll', 'performance', 'assets', 'documents', 'recruitment', 'expenses'].includes(viewType) ? 'var(--nav-active-bg)' : 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.6)', opacity: ['org-chart', 'payroll', 'performance', 'assets', 'documents', 'recruitment', 'expenses'].includes(viewType) ? 1 : 0.75 }}
+                className={`btn btn-glass ${['org-chart', 'payroll', 'performance', 'assets', 'documents', 'recruitment', 'expenses', 'skill-graph'].includes(viewType) ? 'active' : ''}`}
+                style={{ width: '38px', height: '38px', padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: ['org-chart', 'payroll', 'performance', 'assets', 'documents', 'recruitment', 'expenses', 'skill-graph'].includes(viewType) ? 'var(--nav-active-bg)' : 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.6)', opacity: ['org-chart', 'payroll', 'performance', 'assets', 'documents', 'recruitment', 'expenses', 'skill-graph'].includes(viewType) ? 1 : 0.75 }}
                 title="More Modules"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--color-ui-element)' }}>apps</span>
@@ -383,6 +385,16 @@ function App() {
                   <Link to={`/recruitment/${ROLE_TO_PATH[currentRole]}`} style={{ textDecoration: 'none' }} onClick={() => setIsMoreMenuOpen(false)}>
                     <button className="btn btn-glass" style={{ width: '100%', textAlign: 'left', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px', border: 'none', background: viewType === 'recruitment' ? 'var(--nav-active-bg)' : 'transparent', color: 'var(--color-ui-element)', borderRadius: '8px', marginTop: '4px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>group_add</span> Recruitment
+                    </button>
+                  </Link>
+                  <Link to={`/skill-graph/${ROLE_TO_PATH[currentRole]}`} style={{ textDecoration: 'none' }} onClick={() => setIsMoreMenuOpen(false)}>
+                    <button className="btn btn-glass" style={{ width: '100%', textAlign: 'left', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px', border: 'none', background: viewType === 'skill-graph' ? 'var(--nav-active-bg)' : 'transparent', color: 'var(--color-ui-element)', borderRadius: '8px', marginTop: '4px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>hub</span> Skill Graph
+                    </button>
+                  </Link>
+                  <Link to={`/workforce/onboarding`} style={{ textDecoration: 'none' }} onClick={() => setIsMoreMenuOpen(false)}>
+                    <button className="btn btn-glass" style={{ width: '100%', textAlign: 'left', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px', border: 'none', background: location.pathname.includes('/workforce/onboarding') ? 'var(--nav-active-bg)' : 'transparent', color: 'var(--color-ui-element)', borderRadius: '8px', marginTop: '4px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>school</span> Onboarding
                     </button>
                   </Link>
                 </div>
@@ -432,6 +444,10 @@ function App() {
               <Route path="/expenses/:roleSlug" element={<ExpenseClaimsWrapper user={userProfile} />} />
               <Route path="/ai-assistant/:roleSlug" element={<AIAssistantWrapper user={userProfile} />} />
               <Route path="/notifications/:roleSlug" element={<NotificationsWrapper user={userProfile} />} />
+              <Route path="/skill-graph/:roleSlug" element={<SkillGraphWrapper user={userProfile} />} />
+              
+              <Route path="/workforce/onboarding" element={<OnboardingWrapper user={userProfile} />} />
+              <Route path="/workforce/onboarding/:planId" element={<OnboardingWrapper user={userProfile} />} />
               
               <Route path="*" element={<Navigate to={`/dashboard/${ROLE_TO_PATH[currentRole]}`} replace />} />
             </Routes>
@@ -530,6 +546,20 @@ function ExpenseClaimsWrapper({ user }: { user?: any }) {
   const { roleSlug } = useParams<{ roleSlug: string }>();
   const activeRole = PATH_TO_ROLE[roleSlug || 'employee'] || 'Standard Employee';
   return <ExpenseClaimsView role={activeRole} user={user} />;
+}
+
+// Small wrapper component to map URL params to SkillGraphView props
+function SkillGraphWrapper({ user }: { user?: any }) {
+  const { roleSlug } = useParams<{ roleSlug: string }>();
+  const activeRole = PATH_TO_ROLE[roleSlug || 'employee'] || 'Standard Employee';
+  return <SkillGraphView role={activeRole} user={user} />;
+}
+
+// Small wrapper component to map URL params to OnboardingView props
+function OnboardingWrapper({ user }: { user?: any }) {
+  const { roleSlug } = useParams<{ roleSlug: string }>();
+  // roleSlug is unused in OnboardingView but kept for pattern consistency
+  return <OnboardingView user={user} />;
 }
 
 export default App;

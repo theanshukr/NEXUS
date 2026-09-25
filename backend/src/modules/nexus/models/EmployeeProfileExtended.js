@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { employeeSkillSchema } from './EmployeeSkill.js';
 
 /**
  * EmployeeProfileExtended Schema — Nexus Intelligence Layer
@@ -98,6 +99,10 @@ const employeeProfileExtendedSchema = new mongoose.Schema({
       default: null
     }
   }],
+
+  // 1b. Canonical Skills Matrix (New Architecture)
+  // Replaces the legacy free-text skills array with normalized relational skills
+  employeeSkills: [employeeSkillSchema],
 
   // 2. Experience History
   experience: [{

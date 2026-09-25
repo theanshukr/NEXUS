@@ -3,6 +3,83 @@ info:
   title: Enterprise Workforce Management Platform
   version: 1.0.0
 paths:
+  /ai/history:
+    get:
+      summary: getHistory
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /ai/query:
+    post:
+      summary: processQuery
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /assets:
+    get:
+      summary: getAllAssets
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createAsset
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /assets/my:
+    get:
+      summary: getMyAssets
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /assets/{id}:
+    patch:
+      summary: updateAsset
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /attendance/{id}/resolve-conflict:
     put:
       summary: resolveConflict
@@ -375,6 +452,23 @@ paths:
           application/json:
             schema:
               type: string
+  /auth/employee-signup:
+    post:
+      summary: employeeSignup
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
   /auth/logout:
     post:
       summary: Logout User
@@ -703,6 +797,30 @@ paths:
           application/json:
             schema:
               type: string
+  /documents:
+    get:
+      summary: getAllDocuments
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /documents/upload:
+    post:
+      summary: uploadDocument
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
   /employees:
     get:
       summary: getEmployees
@@ -904,6 +1022,166 @@ paths:
           required: true
           schema:
             type: string
+  /expenses:
+    get:
+      summary: getAllExpenses
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createExpense
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /expenses/my:
+    get:
+      summary: getMyExpenses
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /expenses/{id}/status:
+    patch:
+      summary: updateExpenseStatus
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /helpdesk/my:
+    get:
+      summary: getMyTickets
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /helpdesk:
+    post:
+      summary: createTicket
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    get:
+      summary: getAllTickets
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /helpdesk/{id}/messages:
+    post:
+      summary: addMessage
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /helpdesk/{id}/status:
+    patch:
+      summary: updateStatus
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /helpdesk/{id}/assign:
+    patch:
+      summary: assignTicket
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /helpdesk/{id}/agent-messages:
+    post:
+      summary: addMessage
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /invites/validate/{token}:
     get:
       summary: validateToken
@@ -1027,7 +1305,30 @@ paths:
       security:
         - BearerAuth: []
   /leave/requests:
+    get:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
     post:
+      summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /leave/requests/me:
+    get:
       summary: ""
       description: ""
       tags: []
@@ -1107,6 +1408,389 @@ paths:
   /leave/snapshots:
     get:
       summary: ""
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /nexus/employees/{id}/profile:
+    get:
+      summary: getProfile
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    put:
+      summary: updateProfile
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/employees/{id}/skills:
+    post:
+      summary: addSkill
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/employees/{id}/skills/{skillId}:
+    patch:
+      summary: updateSkill
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skillId
+          in: path
+          required: true
+          schema:
+            type: string
+    delete:
+      summary: removeSkill
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skillId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/samples/workforce:
+    get:
+      summary: getSampleWorkforce
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /nexus/skills/extract:
+    post:
+      summary: extractSkills
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /nexus/employees/{employeeId}/skill-analysis:
+    post:
+      summary: analyzeEmployee
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/employees/{employeeId}/skill-gap:
+    get:
+      summary: analyzeSkillGap
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/employees/{employeeId}/projects/{projectId}/skill-gap:
+    get:
+      summary: analyzeSkillGap
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/skill-graph:
+    get:
+      summary: getGraph
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /nexus/employees/{employeeId}/onboarding/plans/generate:
+    post:
+      summary: generatePlan
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/onboarding/plans:
+    post:
+      summary: createPlan
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /nexus/onboarding/plans/{planId}:
+    get:
+      summary: getPlan
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/employees/{employeeId}/onboarding/plans:
+    get:
+      summary: listEmployeePlans
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/onboarding/plans/{planId}/status:
+    patch:
+      summary: updatePlanStatus
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/onboarding/plans/{planId}/next-action:
+    get:
+      summary: getNextAction
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/onboarding/plans/{planId}/tasks/{taskId}/complete:
+    post:
+      summary: completeTask
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/onboarding/plans/{planId}/ai-guidance:
+    get:
+      summary: getPlanGuidance
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+  /nexus/onboarding/plans/{planId}/tasks/{taskId}/ai-guidance:
+    get:
+      summary: getTaskGuidance
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+  /notifications/my:
+    get:
+      summary: getMyNotifications
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /notifications/read:
+    post:
+      summary: markAsRead
       description: ""
       tags: []
       responses:
@@ -1853,6 +2537,134 @@ paths:
           required: true
           schema:
             type: string
+  /performance/goals:
+    get:
+      summary: getAllGoals
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createGoal
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /performance/goals/{id}:
+    patch:
+      summary: updateGoal
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /performance/reviews:
+    get:
+      summary: getAllReviews
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createReview
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /projects:
+    get:
+      summary: getAllProjects
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createProject
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /projects/tasks:
+    get:
+      summary: getAllTasks
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+    post:
+      summary: createTask
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /projects/tasks/{id}/status:
+    patch:
+      summary: updateTaskStatus
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
   /applications/requisitions/{requisitionId}/applications:
     get:
       summary: getApplicationsForRequisition
@@ -1954,6 +2766,42 @@ paths:
           schema:
             type: string
         - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/internal/{id}/apply:
+    post:
+      summary: applyInternal
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+  /applications/internal/{id}/refer:
+    post:
+      summary: referCandidate
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
           in: path
           required: true
           schema:
@@ -2806,6 +3654,108 @@ paths:
           application/json:
             schema:
               type: string
+  /users/pending:
+    get:
+      summary: getPending
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+  /users/{userId}/approve:
+    post:
+      summary: approveUser
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+  /users/{userId}/reject:
+    post:
+      summary: rejectUser
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+  /users/{userId}/revoke-tokens:
+    post:
+      summary: revokeTokens
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+  /users/{userId}/suspend:
+    patch:
+      summary: suspendUser
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+  /users/{userId}/reset-password:
+    post:
+      summary: resetPassword
+      description: ""
+      tags: []
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Forbidden
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
 components:
   securitySchemes:
     BearerAuth:

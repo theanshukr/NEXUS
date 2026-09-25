@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "node --watch src/server.js",
+    "dev:local": "node --watch src/localServer.js",
     "docs:generate": "node --experimental-vm-modules scripts/docs/generateOpenApi.js",
     "start": "node src/server.js",
     "db:create": "migrate-mongo create",
@@ -32,6 +33,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@huggingface/transformers": "^4.3.0",
     "@supabase/supabase-js": "^2.110.0",
     "@upstash/redis": "^1.38.0",
     "axios": "^1.18.1",

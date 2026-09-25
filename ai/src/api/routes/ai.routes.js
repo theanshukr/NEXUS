@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import AIGateway from '#ai/gateway/AIGateway.js';
+import CompletionController from '#ai/api/controllers/CompletionController.js';
 
 const router = Router();
 
@@ -18,6 +19,13 @@ router.post(
   AIGateway.rateLimiter,
   AIGateway.handleChat.bind(AIGateway)
 );
+
+/**
+ * POST /api/v1/ai/complete
+ * Non-streaming JSON completion — used by backend services.
+ * Requires valid auth token; no SSE.
+ */
+router.post('/complete', CompletionController.complete.bind(CompletionController));
 
 /**
  * GET /api/v1/ai/conversations/:sessionId

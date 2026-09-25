@@ -1,0 +1,6 @@
+fastapi==0.110.0
+uvicorn==0.29.0
+gliner==0.2.29
+pydantic==2.6.4
+protobuf
+tiktoken
