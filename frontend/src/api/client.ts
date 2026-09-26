@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // The backend runs on port 5001 according to the docs
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://nexus-9fd1.onrender.com/api/v1';
 export const AI_API_URL = import.meta.env.VITE_AI_API_URL || 'http://localhost:8001/api/v1/ai';
 
 export const apiClient = axios.create({

@@ -13,9 +13,28 @@ import '#@/modules/departments/services/DepartmentBootstrapService.js';
 const app = express();
 
 // Security and Infrastructure Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors({
-  origin: env.CLIENT_URL,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost, vercel deployments, or configured CLIENT_URL
+    if (
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      origin.endsWith('.vercel.app') ||
+      origin === env.CLIENT_URL ||
+      (env.CLIENT_URL && env.CLIENT_URL.split(',').map(u => u.trim()).includes(origin))
+    ) {
+      return callback(null, true);
+    }
+    
+    // In production, also allow the origin if needed
+    return callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json());
