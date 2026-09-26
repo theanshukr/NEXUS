@@ -65,36 +65,44 @@ export class EmployeeService {
     const employee = await runInTransaction(async (session) => {
       const options = { session };
 
+      const cleanWorkEmail = workEmail && typeof workEmail === 'string' && workEmail.trim()
+        ? workEmail.toLowerCase().trim()
+        : undefined;
+      const cleanDeptId = departmentId && typeof departmentId === 'string' && departmentId.trim() ? departmentId.trim() : undefined;
+      const cleanLocId = locationId && typeof locationId === 'string' && locationId.trim() ? locationId.trim() : undefined;
+      const cleanShiftId = shiftId && typeof shiftId === 'string' && shiftId.trim() ? shiftId.trim() : undefined;
+      const cleanManagerId = managerId && typeof managerId === 'string' && managerId.trim() ? managerId.trim() : null;
+
       // Uniqueness: employeeCode
       const existingCode = await EmployeeRepository.findByCode(employeeCode, organizationId, options);
       if (existingCode) {
         throw new ConflictError(`An employee with code '${employeeCode}' already exists in this organization.`);
       }
 
-      // Uniqueness: workEmail (sparse — skip if null)
-      if (workEmail) {
-        const existingEmail = await EmployeeRepository.findByEmail(workEmail, organizationId, options);
+      // Uniqueness: workEmail (sparse — skip if undefined)
+      if (cleanWorkEmail) {
+        const existingEmail = await EmployeeRepository.findByEmail(cleanWorkEmail, organizationId, options);
         if (existingEmail) {
-          throw new ConflictError(`An employee with work email '${workEmail}' already exists in this organization.`);
+          throw new ConflictError(`An employee with work email '${cleanWorkEmail}' already exists in this organization.`);
         }
       }
 
       // Manager validation
-      if (managerId) {
-        await this._validateManager(managerId, null, organizationId, options);
+      if (cleanManagerId) {
+        await this._validateManager(cleanManagerId, null, organizationId, options);
       }
 
       const employee = await EmployeeRepository.createScoped({
         employeeCode: employeeCode.trim().toUpperCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        workEmail: workEmail ? workEmail.toLowerCase().trim() : null,
-        departmentId,
+        ...(cleanWorkEmail ? { workEmail: cleanWorkEmail } : {}),
+        ...(cleanDeptId ? { departmentId: cleanDeptId } : {}),
         designationId,
-        locationId,
-        shiftId,
-        managerId: managerId || null,
-        joiningDate,
+        ...(cleanLocId ? { locationId: cleanLocId } : {}),
+        ...(cleanShiftId ? { shiftId: cleanShiftId } : {}),
+        managerId: cleanManagerId,
+        joiningDate: joiningDate ? new Date(joiningDate) : new Date(),
         status: 'ONBOARDING',
         metadata
       }, organizationId, options);

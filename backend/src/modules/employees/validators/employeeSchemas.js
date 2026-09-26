@@ -3,6 +3,13 @@ import { z } from 'zod';
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 const objectId = z.string().regex(objectIdRegex, 'Invalid MongoDB ObjectId.');
 
+const objectIdOrEmpty = z.union([
+  objectId,
+  z.literal(''),
+  z.null(),
+  z.undefined()
+]);
+
 // ---------------------------------------------------------------------------
 // CREATE EMPLOYEE
 // ---------------------------------------------------------------------------
@@ -13,15 +20,24 @@ export const createEmployeeSchema = z.object({
       .min(1, 'Employee code is required.')
       .max(30, 'Employee code must not exceed 30 characters.')
       .trim(),
-    firstName: z.string().min(1, 'First name is required.').max(100),
-    lastName: z.string().min(1, 'Last name is required.').max(100),
-    workEmail: z.string().email('Invalid email address.').max(255).optional().nullable(),
-    departmentId: objectId.optional(),
+    firstName: z.string().min(1, 'First name is required.').max(100).trim(),
+    lastName: z.string().min(1, 'Last name is required.').max(100).trim(),
+    workEmail: z.union([
+      z.string().email('Invalid email address.').max(255),
+      z.literal(''),
+      z.null(),
+      z.undefined()
+    ]).optional(),
+    departmentId: objectIdOrEmpty.optional(),
     designationId: objectId,
-    locationId: objectId.optional(),
-    shiftId: objectId.optional(),
-    managerId: objectId.nullable().optional(),
-    joiningDate: z.string().datetime({ message: 'joiningDate must be a valid ISO date.' }),
+    locationId: objectIdOrEmpty.optional(),
+    shiftId: objectIdOrEmpty.optional(),
+    managerId: objectIdOrEmpty.optional(),
+    joiningDate: z.union([
+      z.string().datetime({ message: 'joiningDate must be a valid ISO date.' }),
+      z.string().min(1, 'joiningDate is required.'),
+      z.date()
+    ]),
     metadata: z.record(z.unknown()).optional(),
     skills: z.array(z.object({
       name: z.string(),

@@ -28,7 +28,14 @@ async function patch() {
     $addToSet: { permissions: { $each: ['expenses.view', 'expenses.manage', 'projects.view', 'projects.manage'] } }
   });
 
+  // All non-Super Admin roles get at least projects.view (read-only access)
+  await Role.updateMany(
+    { permissions: { $nin: ['*', 'projects.view'] } },
+    { $addToSet: { permissions: 'projects.view' } }
+  );
+
   console.log('Successfully patched roles with new permissions!');
   process.exit(0);
 }
 patch();
+

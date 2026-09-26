@@ -28,8 +28,31 @@ ProjectSchema.methods.toJSON = function() {
     owner: obj.owner,
     dueDate: obj.dueDate,
     progress: obj.progress,
-    requiredSkillIds: obj.requiredSkillIds,
-    team: obj.team,
+    requiredSkills: (obj.requiredSkillIds || []).map(s => {
+      if (s && typeof s === 'object' && s.canonicalName) {
+        return { id: s._id, name: s.canonicalName, category: s.category };
+      }
+      return { id: s };
+    }),
+    requiredSkillIds: (obj.requiredSkillIds || []).map(s => (s && s._id) || s),
+    team: (obj.team || []).map(m => {
+      const emp = m.employeeId;
+      if (emp && typeof emp === 'object' && emp.firstName) {
+        return {
+          _id: m._id,
+          employeeId: emp._id,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          name: `${emp.firstName} ${emp.lastName}`,
+          designation: emp.designation,
+          department: emp.departmentId?.name || null,
+          profilePicture: emp.profilePicture || null,
+          role: m.role
+        };
+      }
+      return { _id: m._id, employeeId: m.employeeId, role: m.role };
+    }),
+    teamCount: (obj.team || []).length,
     created: obj.createdAt,
     updated: obj.updatedAt
   };

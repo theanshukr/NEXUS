@@ -128,16 +128,21 @@ export default function OnboardingView({ user }: { user?: any }) {
   const handleSaveEmployee = async () => {
     setIsSaving(true);
     try {
-      const payload = {
-        employeeCode,
-        firstName,
-        lastName,
-        workEmail: workEmail || undefined,
+      const validSkills = (finalSkills || []).filter(s => s.name && s.name.trim());
+      const payload: any = {
+        employeeCode: employeeCode.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         designationId,
-        departmentId: departmentId || undefined,
-        joiningDate: new Date(joiningDate).toISOString(),
-        skills: finalSkills
+        joiningDate: joiningDate ? new Date(joiningDate).toISOString() : new Date().toISOString(),
+        skills: validSkills
       };
+      if (workEmail && workEmail.trim()) {
+        payload.workEmail = workEmail.trim();
+      }
+      if (departmentId && departmentId.trim()) {
+        payload.departmentId = departmentId.trim();
+      }
 
       const res = await apiClient.post('/employees', payload);
       if (res.data?.success) {

@@ -53,8 +53,7 @@ const employeeSchema = new mongoose.Schema({
   workEmail: {
     type: String,
     trim: true,
-    lowercase: true,
-    default: null
+    lowercase: true
   },
   // Schemaless extension point for future custom fields.
   metadata: {
@@ -126,10 +125,9 @@ const employeeSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// ---- Indexes ----
-// Uniqueness: employeeCode and workEmail are unique per organization (sparse for nullable email).
+// Uniqueness: employeeCode and workEmail are unique per organization.
 employeeSchema.index({ organizationId: 1, employeeCode: 1 }, { unique: true });
-employeeSchema.index({ organizationId: 1, workEmail: 1 }, { unique: true, sparse: true });
+employeeSchema.index({ organizationId: 1, workEmail: 1 }, { unique: true, partialFilterExpression: { workEmail: { $type: 'string' } } });
 // userId is globally unique (1 user ↔ 1 employee). Sparse since not all employees have accounts.
 employeeSchema.index({ userId: 1 }, { unique: true, sparse: true });
 // Soft-delete filter: queries default to { archivedAt: null }.
