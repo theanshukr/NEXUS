@@ -316,11 +316,21 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Backend expects joiningDate in ISO format, datetime-local provides YYYY-MM-DDTHH:mm
-      const payload = { ...onboardingForm, joiningDate: new Date(onboardingForm.joiningDate).toISOString() };
-        delete (payload as any).departmentId;
-        delete (payload as any).locationId;
-        delete (payload as any).shiftId;
+      const validSkills = (onboardingForm.skills || []).filter(s => s.name && s.name.trim());
+      const payload: any = {
+        employeeCode: onboardingForm.employeeCode.trim(),
+        firstName: onboardingForm.firstName.trim(),
+        lastName: onboardingForm.lastName.trim(),
+        designationId: onboardingForm.designationId,
+        joiningDate: onboardingForm.joiningDate ? new Date(onboardingForm.joiningDate).toISOString() : new Date().toISOString(),
+        skills: validSkills
+      };
+      if (onboardingForm.workEmail && onboardingForm.workEmail.trim()) {
+        payload.workEmail = onboardingForm.workEmail.trim();
+      }
+      if (onboardingForm.departmentId && onboardingForm.departmentId.trim()) {
+        payload.departmentId = onboardingForm.departmentId.trim();
+      }
       await apiClient.post('/employees', payload);
       showToast('Success', 'success', 'Employee successfully onboarded!');
       setShowOnboardingModal(false);

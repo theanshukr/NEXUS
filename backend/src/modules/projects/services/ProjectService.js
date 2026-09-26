@@ -1,9 +1,20 @@
 import projectRepo from '../repositories/ProjectRepository.js';
 import taskRepo from '../repositories/TaskRepository.js';
+import Project from '../models/Project.js';
 
 class ProjectService {
   async getAllProjects(organizationId) {
-    return projectRepo.findByOrganization(organizationId, {}, { sort: { createdAt: -1 } });
+    return Project.find({ organizationId })
+      .populate({
+        path: 'team.employeeId',
+        select: 'firstName lastName designation departmentId profilePicture',
+        populate: { path: 'departmentId', select: 'name' }
+      })
+      .populate({
+        path: 'requiredSkillIds',
+        select: 'canonicalName category'
+      })
+      .sort({ createdAt: -1 });
   }
 
   async createProject(organizationId, data) {
@@ -29,3 +40,4 @@ class ProjectService {
 }
 
 export default new ProjectService();
+
