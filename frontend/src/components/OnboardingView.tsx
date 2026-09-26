@@ -1,485 +1,446 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../api/client';
+import { useToast } from './ToastProvider';
 
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  type: string;
-  order: number;
-  status: string;
-  skillIds: string[];
+interface Skill {
+  name: string;
+  proficiency: string;
+  yearsOfExperience: number;
 }
 
-interface Module {
-  _id: string;
-  title: string;
-  description?: string;
-  order: number;
-  status: string;
-  progress: number;
-  tasks: Task[];
-  skillIds: string[];
-}
-
-interface Plan {
-  _id: string;
-  title: string;
-  status: string;
-  progress: number;
-  source: string;
-  designationId?: any;
-  projectId?: any;
-  modules: Module[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface NextAction {
-  taskId: string;
-  type: string;
-  title: string;
-  moduleId: string;
-}
-
-interface NextActionResponse {
-  nextAction: NextAction | null;
-  reason: string;
-}
-
-interface SkillGuidance {
+interface ExtractedSkill {
+  mention: string;
+  canonicalSkill: string;
   skillId: string;
-  skillName: string;
-  whyItMatters: string;
-  recommendedFocus: string[];
-  practiceIdea: string;
-  estimatedDifficulty: string;
-}
-
-interface AIGuidance {
-  summary: string;
-  skillGuidance: SkillGuidance[];
-  nextActionExplanation: string;
-  remediationGuidance: string | null;
-}
-
-interface AIGuidanceResponse {
-  success: boolean;
-  aiAvailable: boolean;
-  guidance?: AIGuidance;
-  error?: { code: string };
-  context?: any;
+  confidence: number;
 }
 
 export default function OnboardingView({ user }: { user?: any }) {
-  const { planId } = useParams<{ planId?: string }>();
-  
-  if (planId) {
-    return <PlanDetailView planId={planId} user={user} />;
-  }
-
-  return <PlanListView user={user} />;
-}
-
-function PlanListView({ user }: { user?: any }) {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  // Step 1 data
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [employeeCode, setEmployeeCode] = useState('');
+  const [workEmail, setWorkEmail] = useState('');
+  const [designationId, setDesignationId] = useState('');
+  const [departmentId, setDepartmentId] = useState('');
+  const [joiningDate, setJoiningDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // Master data
+  const [designations, setDesignations] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<any[]>([]);
+
+  // Step 2 data
+  const [experienceText, setExperienceText] = useState('');
+  const [yearsOfExperience, setYearsOfExperience] = useState(1);
+  const [manualSkills, setManualSkills] = useState<string[]>([]);
+  const [skillSearch, setSkillSearch] = useState('');
+  
+  // Step 3 data
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractedSkills, setExtractedSkills] = useState<ExtractedSkill[]>([]);
+  const [finalSkills, setFinalSkills] = useState<Skill[]>([]);
+  
+  // Step 4 data
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        setLoading(true);
-        // Note: There might not be an explicit GET /plans endpoint provided in instructions 
-        // that handles user-specific plans. Using /nexus/onboarding/plans if it exists, 
-        // else fallback to some error. Wait, STEP 7A didn't explicitly add GET /plans to the list, 
-        // but the prompt says: Allowed: GET plans, GET plan, GET next-action, POST task completion
-        const res = await apiClient.get('/nexus/onboarding/plans');
-        setPlans(res.data.data || []);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Failed to load plans');
-      } finally {
-        setLoading(false);
+    apiClient.get('/designations').then(res => {
+      if (res.data?.success) {
+        const payload = res.data.data;
+        setDesignations(Array.isArray(payload) ? payload : (payload?.data || payload?.docs || []));
       }
-    };
-    fetchPlans();
+    }).catch(e => console.error('Failed to load designations:', e));
+
+    apiClient.get('/departments').then(res => {
+      if (res.data?.success) {
+        const payload = res.data.data;
+        setDepartments(Array.isArray(payload) ? payload : (payload?.data || payload?.docs || []));
+      }
+    }).catch(e => console.error('Failed to load departments:', e));
+    
+    apiClient.get('/nexus/skills').then(res => {
+      if (res.data?.success) {
+        const payload = res.data.data;
+        setAvailableSkills(Array.isArray(payload) ? payload : (payload?.data || payload?.docs || []));
+      }
+    }).catch(e => console.error('Failed to load skills:', e));
   }, []);
 
-  if (loading) return <div className="page-transition" style={{ padding: '24px' }}>Loading plans...</div>;
-  if (error) return <div className="page-transition" style={{ padding: '24px', color: 'red' }}>Error: {error}</div>;
-
-  return (
-    <div className="page-transition" style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', marginBottom: '24px', color: 'var(--color-ui-element)' }}>Workforce Onboarding</h1>
-      
-      {plans.length === 0 ? (
-        <div className="glass-panel" style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-          No onboarding plans found.
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {plans.map(plan => (
-            <div key={plan._id} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease' }} onClick={() => navigate(`../onboarding/${plan._id}`)}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--color-ui-element)' }}>{plan.title}</h3>
-                <span style={{ 
-                  padding: '4px 8px', 
-                  borderRadius: '12px', 
-                  fontSize: '12px', 
-                  fontWeight: 600,
-                  backgroundColor: plan.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.2)' : 
-                                   plan.status === 'ACTIVE' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                  color: plan.status === 'COMPLETED' ? '#34d399' : 
-                         plan.status === 'ACTIVE' ? '#38bdf8' : 'var(--color-text-secondary)'
-                }}>
-                  {plan.status}
-                </span>
-              </div>
-              
-              <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>
-                {plan.designationId && <span>Role target: {plan.designationId?.title || 'Unknown Role'}</span>}
-                {plan.projectId && <span>Project target: {plan.projectId?.name || 'Unknown Project'}</span>}
-              </div>
-
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px', color: 'var(--color-text-secondary)' }}>
-                  <span>Progress</span>
-                  <span>{plan.progress}%</span>
-                </div>
-                <div style={{ height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', background: plan.status === 'COMPLETED' ? '#34d399' : '#38bdf8', width: `${plan.progress}%`, transition: 'width 0.3s ease' }} />
-                </div>
-              </div>
-              
-              {plan.status === 'DRAFT' && (
-                <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '12px', fontStyle: 'italic' }}>
-                  Waiting for activation
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PlanDetailView({ planId, user }: { planId: string, user?: any }) {
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [nextActionRes, setNextActionRes] = useState<NextActionResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [aiGuidance, setAiGuidance] = useState<AIGuidanceResponse | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
-
-  const fetchPlanAndNextAction = async () => {
-    try {
-      setLoading(true);
-      const [planRes, actionRes] = await Promise.all([
-        apiClient.get(`/nexus/onboarding/plans/${planId}`),
-        apiClient.get(`/nexus/onboarding/plans/${planId}/next-action`).catch(() => ({ data: null }))
-      ]);
-      setPlan(planRes.data.data);
-      if (actionRes.data) {
-        setNextActionRes(actionRes.data);
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load plan');
-    } finally {
-      setLoading(false);
+  const handleNextToStep2 = () => {
+    if (!firstName || !lastName || !employeeCode || !designationId) {
+      showToast('Validation Error', 'error', 'Please fill in all required fields.');
+      return;
     }
+    setStep(2);
   };
 
-  const fetchAIGuidance = async () => {
-    setAiLoading(true);
-    try {
-      const res = await apiClient.get(`/nexus/onboarding/plans/${planId}/ai-guidance`);
-      setAiGuidance(res.data);
-    } catch {
-      setAiGuidance({ success: false, aiAvailable: false, error: { code: 'AI_UNAVAILABLE' } });
-    } finally {
-      setAiLoading(false);
+  const handleNextToStep3 = async () => {
+    // Always proceed if there's manual skills or text, otherwise block
+    if (!experienceText.trim() && manualSkills.length === 0) {
+      showToast('Validation Error', 'error', 'Please provide resume text or select at least one manual skill.');
+      return;
     }
-  };
+    setStep(3);
+    
+    const allManual = manualSkills.map(sName => ({
+      name: sName,
+      proficiency: 'Intermediate',
+      yearsOfExperience: yearsOfExperience
+    }));
 
-  useEffect(() => {
-    fetchPlanAndNextAction();
-  }, [planId]);
-
-  const handleCompleteTask = async (taskId: string, outcome: string = 'passed') => {
-    try {
-      setActionLoading(true);
-      await apiClient.post(`/nexus/onboarding/plans/${planId}/tasks/${taskId}/complete`, { outcome });
-      await fetchPlanAndNextAction();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to complete task');
-    } finally {
-      setActionLoading(false);
+    if (!experienceText.trim()) {
+      // If no text, just skip extraction and use manual skills
+      setFinalSkills(allManual);
+      return;
     }
-  };
 
-  if (loading) return <div className="page-transition" style={{ padding: '24px' }}>Loading plan...</div>;
-  if (error) return <div className="page-transition" style={{ padding: '24px', color: 'red' }}>Error: {error}</div>;
-  if (!plan) return <div className="page-transition" style={{ padding: '24px' }}>Plan not found.</div>;
-
-  return (
-    <div className="page-transition" style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-      <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', margin: '0 0 8px 0', color: 'var(--color-ui-element)' }}>{plan.title}</h1>
+    setIsExtracting(true);
+    try {
+      const res = await apiClient.post('/nexus/skills/extract', { text: experienceText });
+      if (res.data?.success) {
+        setExtractedSkills(res.data.mentions || []);
         
-        <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
-          <span>Status: <strong>{plan.status}</strong></span>
-          {plan.designationId && <span>Target Role: <strong>{plan.designationId?.title || 'Unknown'}</strong></span>}
-          {plan.projectId && <span>Target Project: <strong>{plan.projectId?.name || 'Unknown'}</strong></span>}
-        </div>
+        const allExtracted = (res.data.mentions || []).map((m: any) => ({
+          name: m.canonicalSkill || m.mention,
+          proficiency: 'Intermediate',
+          yearsOfExperience: yearsOfExperience
+        }));
+        
+        const combined = [...allManual, ...allExtracted];
+        const unique = Array.from(new Map(combined.map(s => [s.name, s])).values());
+        
+        setFinalSkills(unique);
+      }
+    } catch (e: any) {
+      showToast('Extraction Error', 'error', e.response?.data?.message || 'Failed to extract skills.');
+      setFinalSkills(allManual);
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '6px', color: 'var(--color-ui-element)' }}>
-            <span>Overall Progress</span>
-            <span style={{ fontWeight: 600 }}>{plan.progress}%</span>
-          </div>
-          <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: plan.progress === 100 ? '#34d399' : '#38bdf8', width: `${plan.progress}%`, transition: 'width 0.4s ease' }} />
-          </div>
-        </div>
+  const handleSaveEmployee = async () => {
+    setIsSaving(true);
+    try {
+      const payload = {
+        employeeCode,
+        firstName,
+        lastName,
+        workEmail: workEmail || undefined,
+        designationId,
+        departmentId: departmentId || undefined,
+        joiningDate: new Date(joiningDate).toISOString(),
+        skills: finalSkills
+      };
+
+      const res = await apiClient.post('/employees', payload);
+      if (res.data?.success) {
+        showToast('Success', 'success', 'Employee successfully onboarded and added to Skill Graph.');
+        setStep(5);
+      }
+    } catch (e: any) {
+      showToast('Save Error', 'error', e.response?.data?.message || 'Failed to create employee.');
+      console.error(e.response?.data);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const removeSkill = (index: number) => {
+    setFinalSkills(prev => prev.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="page-transition" style={{ padding: '32px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '28px', color: 'var(--color-ui-element)', marginBottom: '8px' }}>Intelligent Workforce Onboarding</h1>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Extract AI skills from resume and seamlessly map the employee to the Enterprise Skill Graph.</p>
       </div>
 
-      {plan.status === 'COMPLETED' && (
-        <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎉</div>
-          <h2 style={{ fontSize: '20px', color: '#34d399', margin: '0 0 8px 0' }}>Onboarding Complete</h2>
-          <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '14px' }}>All required onboarding modules have been completed.</p>
-          <div style={{ marginTop: '16px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-            Final progress: <strong style={{ color: '#34d399' }}>100%</strong>
-          </div>
-        </div>
-      )}
-
-      {plan.status === 'DRAFT' && (
-        <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px', background: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>pending</span>
-          <h2 style={{ fontSize: '20px', color: 'var(--color-ui-element)', margin: '0 0 8px 0' }}>DRAFT PLAN</h2>
-          <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '14px' }}>Waiting for activation.</p>
-        </div>
-      )}
-
-      {plan.status === 'ACTIVE' && nextActionRes?.nextAction && (
-        <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px', borderLeft: '4px solid #38bdf8' }}>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Next Action</div>
-          
-          <h3 style={{ fontSize: '18px', color: 'var(--color-ui-element)', margin: '0 0 16px 0' }}>
-            [{nextActionRes.nextAction.title}]
-          </h3>
-          
-          {nextActionRes.nextAction.title.includes('Remediation') && (
-            <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', color: '#f87171', fontSize: '14px' }}>
-              <strong style={{ display: 'block', marginBottom: '4px' }}>❌ Assessment Not Passed</strong>
-              Your next step is to complete this remediation practice generated by the adaptive engine.
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: '12px' }}>
-            {nextActionRes.nextAction.type === 'ASSESSMENT' ? (
-              <>
-                <button 
-                  className="btn btn-primary"
-                  disabled={actionLoading}
-                  onClick={() => handleCompleteTask(nextActionRes.nextAction!.taskId, 'passed')}
-                  style={{ padding: '10px 20px', background: '#34d399' }}
-                >
-                  {actionLoading ? 'Processing...' : 'Pass Assessment'}
-                </button>
-                <button 
-                  className="btn btn-glass"
-                  disabled={actionLoading}
-                  onClick={() => handleCompleteTask(nextActionRes.nextAction!.taskId, 'failed')}
-                  style={{ padding: '10px 20px', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.3)' }}
-                >
-                  Fail Assessment
-                </button>
-              </>
-            ) : (
-              <button 
-                className="btn btn-primary"
-                disabled={actionLoading}
-                onClick={() => handleCompleteTask(nextActionRes.nextAction!.taskId)}
-                style={{ padding: '10px 24px' }}
-              >
-                {actionLoading ? 'Processing...' : 'Complete Task'}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* AI Learning Guidance Panel */}
-      {plan.status === 'ACTIVE' && (
-        <div className="glass-panel" style={{ padding: '20px', marginBottom: '16px', border: '1px solid rgba(167, 139, 250, 0.2)', background: 'rgba(139, 92, 246, 0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#a78bfa' }}>auto_awesome</span>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                AI Learning Guidance
-              </span>
-            </div>
-            {!aiGuidance && !aiLoading && (
-              <button
-                className="btn btn-glass"
-                onClick={fetchAIGuidance}
-                style={{ padding: '6px 14px', fontSize: '12px', color: '#a78bfa', borderColor: 'rgba(167, 139, 250, 0.3)' }}
-              >
-                Generate Guidance
-              </button>
-            )}
-            {aiGuidance && (
-              <button
-                className="btn btn-glass"
-                onClick={fetchAIGuidance}
-                disabled={aiLoading}
-                style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--color-text-secondary)' }}
-              >
-                Refresh
-              </button>
-            )}
-          </div>
-
-          {aiLoading && (
-            <div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-text-secondary)', fontSize: '14px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '24px', display: 'block', marginBottom: '8px', animation: 'spin 1s linear infinite' }}>refresh</span>
-              Generating personalized guidance...
-            </div>
-          )}
-
-          {aiGuidance && !aiLoading && !aiGuidance.success && (
-            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle', marginRight: '6px' }}>cloud_off</span>
-              AI guidance is currently unavailable. The onboarding system continues to work normally.
-            </div>
-          )}
-
-          {aiGuidance?.success && aiGuidance.guidance && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Summary */}
-              <div style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6, fontStyle: 'italic' }}>
-                {aiGuidance.guidance.summary}
-              </div>
-
-              {/* Skill Guidance */}
-              {aiGuidance.guidance.skillGuidance.map(sg => (
-                <div key={sg.skillId} style={{ padding: '16px', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', border: '1px solid rgba(167,139,250,0.1)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <strong style={{ color: '#a78bfa', fontSize: '14px' }}>{sg.skillName}</strong>
-                    <span style={{ fontSize: '11px', padding: '2px 6px', background: 'rgba(167,139,250,0.15)', borderRadius: '4px', color: '#a78bfa' }}>
-                      {sg.estimatedDifficulty}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 10px 0' }}>
-                    <strong style={{ color: 'var(--color-ui-element)' }}>Why it matters: </strong>{sg.whyItMatters}
-                  </p>
-                  <div style={{ marginBottom: '10px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-ui-element)', marginBottom: '4px' }}>Focus on</div>
-                    <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                      {sg.recommendedFocus.map((f, i) => <li key={i}>{f}</li>)}
-                    </ul>
-                  </div>
-                  <div style={{ fontSize: '13px', padding: '8px 12px', background: 'rgba(167,139,250,0.08)', borderRadius: '6px', borderLeft: '3px solid #a78bfa' }}>
-                    <strong style={{ color: '#a78bfa', fontSize: '12px' }}>Practical exercise: </strong>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>{sg.practiceIdea}</span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Next Action Explanation */}
-              {aiGuidance.guidance.nextActionExplanation && (
-                <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', padding: '12px', background: 'rgba(56,189,248,0.05)', borderRadius: '8px', borderLeft: '3px solid #38bdf8' }}>
-                  <strong style={{ color: '#38bdf8', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Why this task</strong>
-                  {aiGuidance.guidance.nextActionExplanation}
-                </div>
-              )}
-
-              {/* Remediation Guidance */}
-              {aiGuidance.guidance.remediationGuidance && (
-                <div style={{ fontSize: '13px', color: '#fbbf24', padding: '12px', background: 'rgba(245,158,11,0.08)', borderRadius: '8px', borderLeft: '3px solid #f59e0b' }}>
-                  <strong style={{ display: 'block', marginBottom: '4px' }}>Remediation Guidance</strong>
-                  {aiGuidance.guidance.remediationGuidance}
-                </div>
-              )}
-
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', textAlign: 'right' }}>
-                ✨ AI recommendations — not verified facts. Generated from your skill profile.
-              </div>
-            </div>
-          )}
-
-          {!aiGuidance && !aiLoading && (
-            <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
-              Click "Generate Guidance" to receive personalized learning recommendations based on your skills and experience.
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <h3 style={{ fontSize: '16px', color: 'var(--color-ui-element)', margin: '16px 0 8px 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Modules</h3>
-        
-        {plan.modules.map((mod, i) => (
-          <div key={mod._id} className="glass-panel" style={{ padding: '20px', border: mod.status === 'COMPLETED' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--color-ui-element)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                MODULE {i + 1}: {mod.title}
-                {mod.status === 'COMPLETED' && <span className="material-symbols-outlined" style={{ color: '#34d399', fontSize: '18px' }}>check_circle</span>}
-                {mod.status === 'BLOCKED' && <span className="material-symbols-outlined" style={{ color: 'var(--color-text-secondary)', fontSize: '18px' }}>lock</span>}
-              </h4>
-              <span style={{ fontSize: '14px', fontWeight: 600, color: mod.progress === 100 ? '#34d399' : 'var(--color-text-secondary)' }}>{mod.progress}%</span>
-            </div>
-
-            <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden', marginBottom: '16px' }}>
-              <div style={{ height: '100%', background: mod.progress === 100 ? '#34d399' : '#38bdf8', width: `${mod.progress}%` }} />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {mod.tasks.map(task => {
-                const isCompleted = task.status === 'COMPLETED' || task.status === 'SKIPPED';
-                const isNext = nextActionRes?.nextAction?.taskId === task._id;
-                
-                return (
-                  <div key={task._id} style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '12px', 
-                    padding: '10px 12px', 
-                    background: isNext ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255,255,255,0.03)', 
-                    borderRadius: '6px',
-                    borderLeft: isNext ? '3px solid #38bdf8' : '3px solid transparent'
-                  }}>
-                    {isCompleted ? (
-                      <span className="material-symbols-outlined" style={{ color: '#34d399', fontSize: '18px' }}>check</span>
-                    ) : isNext ? (
-                      <span className="material-symbols-outlined" style={{ color: '#38bdf8', fontSize: '18px' }}>arrow_forward</span>
-                    ) : (
-                      <span className="material-symbols-outlined" style={{ color: 'rgba(255,255,255,0.2)', fontSize: '18px' }}>radio_button_unchecked</span>
-                    )}
-                    <span style={{ 
-                      fontSize: '14px', 
-                      color: isCompleted ? 'var(--color-text-secondary)' : isNext ? 'var(--color-ui-element)' : 'var(--color-text-secondary)',
-                      textDecoration: isCompleted ? 'line-through' : 'none',
-                      flex: 1
-                    }}>
-                      {task.title}
-                    </span>
-                    <span style={{ fontSize: '11px', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', color: 'var(--color-text-secondary)' }}>
-                      {task.type}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
+        {[1, 2, 3, 4, 5].map(s => (
+          <div key={s} style={{
+            flex: 1, height: '4px', borderRadius: '2px',
+            background: step >= s ? '#38bdf8' : 'rgba(255,255,255,0.1)'
+          }} />
         ))}
       </div>
+
+      {step === 1 && (
+        <div className="glass-panel" style={{ padding: '32px' }}>
+          <h2 style={{ fontSize: '20px', marginBottom: '24px', color: 'var(--color-ui-element)' }}>Step 1: Basic Information</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>First Name *</label>
+              <input type="text" className="glass-input" style={{ width: '100%', padding: '12px' }} value={firstName} onChange={e => setFirstName(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Last Name *</label>
+              <input type="text" className="glass-input" style={{ width: '100%', padding: '12px' }} value={lastName} onChange={e => setLastName(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Employee Code *</label>
+              <input type="text" className="glass-input" style={{ width: '100%', padding: '12px' }} value={employeeCode} onChange={e => setEmployeeCode(e.target.value)} placeholder="e.g. EMP-001" />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Work Email</label>
+              <input type="email" className="glass-input" style={{ width: '100%', padding: '12px' }} value={workEmail} onChange={e => setWorkEmail(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Designation / Role *</label>
+              <select className="glass-input" style={{ width: '100%', padding: '12px' }} value={designationId} onChange={e => setDesignationId(e.target.value)}>
+                <option value="" style={{ color: '#64748b', background: '#1e293b' }}>Select Role...</option>
+                {designations.map(d => <option key={d._id} value={d._id} style={{ color: '#ffffff', background: '#1e293b' }}>{d.title || d.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Department</label>
+              <select className="glass-input" style={{ width: '100%', padding: '12px' }} value={departmentId} onChange={e => setDepartmentId(e.target.value)}>
+                <option value="" style={{ color: '#64748b', background: '#1e293b' }}>Select Department...</option>
+                {departments.map(d => <option key={d._id} value={d._id} style={{ color: '#ffffff', background: '#1e293b' }}>{d.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Joining Date</label>
+              <input type="date" className="glass-input" style={{ width: '100%', padding: '12px', colorScheme: 'dark' }} value={joiningDate} onChange={e => setJoiningDate(e.target.value)} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button className="btn btn-primary" onClick={handleNextToStep2} style={{ padding: '12px 24px', fontWeight: 600 }}>Next Step</button>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="glass-panel" style={{ padding: '32px' }}>
+          <h2 style={{ fontSize: '20px', marginBottom: '24px', color: 'var(--color-ui-element)' }}>Step 2: Professional Profile & AI Skills</h2>
+          
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Manual Skill Selection</label>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>
+              Select known skills from the existing Enterprise Skill Graph.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <input 
+                type="text"
+                placeholder="Search skills (e.g. Python, React, PostgreSQL)..."
+                className="glass-input"
+                style={{ padding: '8px 12px', fontSize: '13px', width: '100%' }}
+                value={skillSearch}
+                onChange={e => setSkillSearch(e.target.value)}
+              />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingTop: '8px' }}>
+                {availableSkills
+                  .filter(skill => (skill.canonicalName || skill.name || '').toLowerCase().includes((skillSearch || '').toLowerCase()))
+                  .map(skill => {
+                    const skillName = skill.canonicalName || skill.name;
+                    const isSelected = manualSkills.includes(skillName);
+                    return (
+                      <label key={skill._id} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isSelected ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: '16px', fontSize: '13px', cursor: 'pointer', border: isSelected ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid rgba(255,255,255,0.1)', transition: 'all 0.2s' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={isSelected} 
+                          onChange={(e) => {
+                            if (e.target.checked) setManualSkills([...manualSkills, skillName]);
+                            else setManualSkills(manualSkills.filter(s => s !== skillName));
+                          }} 
+                          style={{ display: 'none' }}
+                        />
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isSelected ? '#38bdf8' : 'var(--color-text-secondary)' }}>
+                          {isSelected ? 'check_circle' : 'add_circle'}
+                        </span>
+                        <span style={{ color: isSelected ? 'var(--color-ui-element)' : 'var(--color-text-secondary)' }}>
+                          {skillName}
+                        </span>
+                      </label>
+                    );
+                  })}
+                {availableSkills.filter(skill => (skill.canonicalName || skill.name || '').toLowerCase().includes((skillSearch || '').toLowerCase())).length === 0 && (
+                  <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>No matching skills found.</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Years of Experience</label>
+            <input type="number" min="0" className="glass-input" style={{ width: '200px', padding: '12px' }} value={yearsOfExperience} onChange={e => setYearsOfExperience(Number(e.target.value))} />
+          </div>
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Resume / Work Experience Description (Optional)</label>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>
+              Paste the employee's project history, resume, or background. Our GLiNER AI pipeline will extract and normalize technology skills to build the Skill Graph profile.
+            </p>
+            <textarea 
+              className="glass-input" 
+              style={{ width: '100%', padding: '16px', minHeight: '200px', lineHeight: '1.5', resize: 'vertical' }}
+              value={experienceText}
+              onChange={e => setExperienceText(e.target.value)}
+              placeholder="e.g. Led backend migration using Node.js, Express, and MongoDB. Familiar with Python, Docker, and AWS."
+            />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button className="btn btn-glass" onClick={() => setStep(1)} style={{ padding: '12px 24px' }}>Back</button>
+            <button className="btn btn-primary" onClick={handleNextToStep3} style={{ padding: '12px 24px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>auto_awesome</span>
+              Extract Skills
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="glass-panel" style={{ padding: '32px' }}>
+          <h2 style={{ fontSize: '20px', marginBottom: '24px', color: 'var(--color-ui-element)' }}>Step 3: Review Extracted Skills</h2>
+          
+          {isExtracting ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px', animation: 'spin 1s linear infinite', marginBottom: '16px' }}>refresh</span>
+              <div>AI is analyzing text and mapping to ESCO taxonomies...</div>
+            </div>
+          ) : (
+            <>
+              {finalSkills.length === 0 ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', marginBottom: '24px' }}>
+                  No skills were detected by the AI. You can go back and provide more detailed text.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 40px', gap: '16px', padding: '0 16px', fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    <span>Skill (Normalized)</span>
+                    <span>Proficiency</span>
+                    <span>Years Exp</span>
+                    <span></span>
+                  </div>
+                  {finalSkills.map((skill, idx) => (
+                    <div key={idx} className="glass-cutout" style={{ padding: '16px', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 40px', gap: '16px', alignItems: 'center' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--color-ui-element)' }}>{skill.name}</div>
+                      <select 
+                        className="glass-input" 
+                        style={{ padding: '8px', fontSize: '13px' }}
+                        value={skill.proficiency}
+                        onChange={e => {
+                          const updated = [...finalSkills];
+                          updated[idx].proficiency = e.target.value;
+                          setFinalSkills(updated);
+                        }}
+                      >
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Expert">Expert</option>
+                      </select>
+                      <input 
+                        type="number" 
+                        className="glass-input" 
+                        style={{ padding: '8px', fontSize: '13px' }}
+                        value={skill.yearsOfExperience}
+                        onChange={e => {
+                          const updated = [...finalSkills];
+                          updated[idx].yearsOfExperience = Number(e.target.value);
+                          setFinalSkills(updated);
+                        }}
+                      />
+                      <button onClick={() => removeSkill(idx)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button className="btn btn-glass" onClick={() => setStep(2)} style={{ padding: '12px 24px' }}>Back</button>
+                <button className="btn btn-primary" onClick={() => setStep(4)} style={{ padding: '12px 24px', fontWeight: 600 }}>Review & Submit</button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {step === 4 && (
+        <div className="glass-panel" style={{ padding: '32px' }}>
+          <h2 style={{ fontSize: '20px', marginBottom: '24px', color: 'var(--color-ui-element)' }}>Step 4: Final Review</h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '32px' }}>
+            <div>
+              <h3 style={{ fontSize: '14px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Employee Details</h3>
+              <div className="glass-cutout" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Name</span> <span style={{ fontWeight: 500 }}>{firstName} {lastName}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>ID</span> <span style={{ fontWeight: 500 }}>{employeeCode}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Email</span> <span style={{ fontWeight: 500 }}>{workEmail || 'N/A'}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Role</span> <span style={{ fontWeight: 500 }}>{designations.find(d => d._id === designationId)?.title || designationId}</span></div>
+              </div>
+            </div>
+            
+            <div>
+              <h3 style={{ fontSize: '14px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Skills Graph Data ({finalSkills.length})</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {finalSkills.map((s, i) => (
+                  <span key={i} style={{ padding: '6px 12px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '20px', fontSize: '13px', color: '#38bdf8' }}>
+                    {s.name} ({s.proficiency})
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button className="btn btn-glass" onClick={() => setStep(3)} style={{ padding: '12px 24px' }}>Back</button>
+            <button className="btn btn-primary" onClick={handleSaveEmployee} disabled={isSaving} style={{ padding: '12px 24px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isSaving ? <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>refresh</span> : <span className="material-symbols-outlined">save</span>}
+              Confirm & Onboard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 5 && (
+        <div className="glass-panel" style={{ padding: '48px', textAlign: 'center' }}>
+          <div style={{ 
+            width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px auto',
+            border: '2px solid rgba(16, 185, 129, 0.3)'
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '40px', color: '#10b981' }}>check_circle</span>
+          </div>
+          
+          <h2 style={{ fontSize: '24px', marginBottom: '16px', color: 'var(--color-ui-element)' }}>Employee Successfully Onboarded</h2>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '32px', maxWidth: '400px', margin: '0 auto 32px auto', lineHeight: '1.5' }}>
+            {firstName} {lastName} has been added to the platform. Their extracted skills have been normalized and injected into the Enterprise Skill Graph.
+          </p>
+          
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+            <button className="btn btn-primary" onClick={() => {
+              const currentRole = user?.roles?.[0] || 'Standard Employee';
+              const roleSlugMap: Record<string, string> = {
+                'Standard Employee': 'employee',
+                'HR Manager': 'hr',
+                'Administrator': 'admin',
+                'Finance Executive': 'finance',
+                'Super Admin': 'superadmin'
+              };
+              navigate(`/skill-graph/${roleSlugMap[currentRole] || 'employee'}`);
+            }} style={{ padding: '12px 24px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="material-symbols-outlined">hub</span>
+              View in Skill Graph
+            </button>
+            <button className="btn btn-glass" onClick={() => {
+              setFirstName(''); setLastName(''); setEmployeeCode(''); setWorkEmail('');
+              setExperienceText(''); setExtractedSkills([]); setFinalSkills([]);
+              setStep(1);
+            }} style={{ padding: '12px 24px', fontWeight: 600 }}>
+              Onboard Another
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

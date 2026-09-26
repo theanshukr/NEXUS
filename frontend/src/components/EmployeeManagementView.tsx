@@ -269,32 +269,46 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [onboardingForm, setOnboardingForm] = useState<{ employeeCode: string; firstName: string; lastName: string; workEmail: string; joiningDate: string; departmentId: string; designationId: string; locationId: string; shiftId: string; skills: Array<{ name: string; proficiency: string; yearsOfExperience: number; }>; }>({ employeeCode: '', firstName: '', lastName: '', workEmail: '', joiningDate: '', departmentId: '', designationId: '', locationId: '', shiftId: '', skills: [] });
+  const [onboardingForm, setOnboardingForm] = useState<{ employeeCode: string; firstName: string; lastName: string; workEmail: string; joiningDate: string; departmentId: string; designationId: string; locationId: string; shiftId: string; skills: Array<{ name: string; proficiency: string; yearsOfExperience: number; }>; }>({ employeeCode: '', firstName: '', lastName: '', workEmail: '', joiningDate: '', departmentId: '', designationId: '', locationId: '', shiftId: '', skills: [{ name: '', proficiency: 'Intermediate', yearsOfExperience: 1 }] });
   const [offboardingForm, setOffboardingForm] = useState({ employeeId: '', reason: '' });
   
   const [designations, setDesignations] = useState<any[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<any[]>([]);
+  const [focusedSkillIndex, setFocusedSkillIndex] = useState<number | null>(null);
   const [fullProfile, setFullProfile] = useState<any>(null);
   const [selectedEmpIdForProfile, setSelectedEmpIdForProfile] = useState<string>('');
   const [isProfileLoading, setIsProfileLoading] = useState(false);
 
   const fetchOptions = async () => {
-    try {
-      const [depRes, desRes, locRes, shiftRes] = await Promise.all([
-        apiClient.get('/departments'),
-        apiClient.get('/designations'),
-        apiClient.get('/locations'),
-        apiClient.get('/shifts')
-      ]);
-      setDesignations(desRes.data?.data?.data || desRes.data?.data || []);
-        } catch (err) {
-      console.error('Failed to fetch options', err);
-    }
+    apiClient.get('/designations').then(res => {
+      const desPayload = res.data?.data;
+      const list = Array.isArray(desPayload) ? desPayload : (desPayload?.data || desPayload?.docs || []);
+      if (list.length > 0) setDesignations(list);
+    }).catch(err => console.error('Failed to fetch designations', err));
+
+    apiClient.get('/nexus/skills').then(res => {
+      const skillsPayload = res.data?.data;
+      const list = Array.isArray(skillsPayload) ? skillsPayload : (skillsPayload?.data || skillsPayload?.docs || []);
+      if (list.length > 0) setAvailableSkills(list);
+    }).catch(err => console.error('Failed to fetch skills', err));
+
+    apiClient.get('/departments').catch(() => null);
+    apiClient.get('/locations').catch(() => null);
+    apiClient.get('/shifts').catch(() => null);
   };
+
+  useEffect(() => {
+    fetchOptions();
+  }, []);
 
   useEffect(() => {
     if (showOnboardingModal) {
       fetchOptions();
-      setOnboardingForm({ ...onboardingForm, employeeCode: `EMP-${Math.floor(1000 + Math.random() * 9000)}` });
+      setOnboardingForm(prev => ({
+        ...prev,
+        employeeCode: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
+        skills: prev.skills.length > 0 ? prev.skills : [{ name: '', proficiency: 'Intermediate', yearsOfExperience: 1 }]
+      }));
     }
   }, [showOnboardingModal]);
 
@@ -415,30 +429,44 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
         <div className="glass-panel" style={{ padding: '40px', position: 'relative', overflow: 'hidden' }}>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '40px' }}>
-            <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: 'linear-gradient(135deg, #38bdf8, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px', color: '#fff', fontWeight: 800, boxShadow: '0 8px 24px rgba(56,189,248,0.4)' }}>
+            <div style={{
+              width: '96px',
+              height: '96px',
+              borderRadius: '50%',
+              background: 'var(--nav-active-bg)',
+              border: '2px solid var(--cutout-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '36px',
+              color: 'var(--color-primary)',
+              fontWeight: 800,
+              boxShadow: '0 4px 16px var(--glass-shadow)',
+              letterSpacing: '-0.5px'
+            }}>
               {user ? user.firstName?.[0] : 'S'}{user ? user.lastName?.[0] : 'J'}
             </div>
             <div>
-              <h2 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: 800 }}>{user ? `${user.firstName} ${user.lastName}` : 'Sarah Jenkins'}</h2>
-              <p style={{ margin: 0, opacity: 0.7, fontSize: '16px', fontWeight: 500 }}>{user?.roles?.[0] || 'Employee'}</p>
+              <h2 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: 800, color: 'var(--color-primary)' }}>{user ? `${user.firstName} ${user.lastName}` : 'Sarah Jenkins'}</h2>
+              <p style={{ margin: 0, color: 'var(--color-ui-element)', fontSize: '16px', fontWeight: 500 }}>{user?.roles?.[0] || 'Employee'}</p>
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
             {/* Stat Cards */}
             {[
-              { icon: 'mail', label: 'Email Address', value: user?.email || 'sarah.jenkins@company.com', color: '#38bdf8' },
-              { icon: 'call', label: 'Phone Number', value: profilePhone, color: '#8b5cf6' },
-              { icon: 'location_on', label: 'Location', value: profileLocation, color: '#10b981' },
-              { icon: 'badge', label: 'Employee ID', value: user?.employeeCode || 'EMP-001', color: '#f59e0b' }
+              { icon: 'mail', label: 'Email Address', value: user?.email || 'sarah.jenkins@company.com' },
+              { icon: 'call', label: 'Phone Number', value: profilePhone },
+              { icon: 'location_on', label: 'Location', value: profileLocation },
+              { icon: 'badge', label: 'Employee ID', value: user?.employeeCode || 'EMP-001' }
             ].map((stat, i) => (
-              <div key={i} className="glass-cutout" style={{ padding: '20px', display: 'flex', alignItems: 'flex-start', gap: '16px', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `${stat.color}15`, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div key={i} className="glass-cutout" style={{ padding: '20px', display: 'flex', alignItems: 'flex-start', gap: '16px', border: '1px solid var(--cutout-border)', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--nav-active-bg)', color: 'var(--color-ui-element)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--cutout-border)' }}>
                   <span className="material-symbols-outlined">{stat.icon}</span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.6, fontWeight: 700, marginBottom: '4px' }}>{stat.label}</div>
-                  <div style={{ fontSize: '15px', fontWeight: 600 }}>{stat.value}</div>
+                  <div className="text-metadata" style={{ marginBottom: '4px' }}>{stat.label}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-primary)' }}>{stat.value}</div>
                 </div>
               </div>
             ))}
@@ -456,7 +484,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>auto_awesome</span>
               View Nexus Intelligence Profile
             </button>
-            <button onClick={() => setShowEditProfileModal(true)} style={{ padding: '12px 24px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <button onClick={() => setShowEditProfileModal(true)} className="btn btn-glass" style={{ padding: '12px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
               Edit Profile
             </button>
@@ -466,21 +494,21 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
 
       <div style={{ gridColumn: 'span 1' }}>
         <div className="glass-panel" style={{ padding: '32px', height: '100%' }}>
-          <h3 style={{ margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '20px', fontWeight: 800 }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(56,189,248,0.1)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <h3 style={{ margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '20px', fontWeight: 800, color: 'var(--color-primary)' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--nav-active-bg)', color: 'var(--color-ui-element)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--cutout-border)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>checklist</span>
             </div>
             Onboarding Checklist
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {onboardingItems.map((item, index) => (
-              <div key={index} onClick={() => toggleOnboardingStatus(index)} className="glass-cutout" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', transition: 'all 0.2s', cursor: 'pointer' }} onMouseEnter={e=>{e.currentTarget.style.background='var(--glass-border-light)'; e.currentTarget.style.transform='translateX(4px)'}} onMouseLeave={e=>{e.currentTarget.style.background='var(--cutout-bg)'; e.currentTarget.style.transform='translateX(0)'}}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: item.status === 'Done' ? '#10b981' : 'var(--cutout-bg)', color: item.status === 'Done' ? '#fff' : 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: item.status === 'Done' ? '0 0 12px rgba(16,185,129,0.4)' : 'none', transition: 'all 0.3s' }}>
+              <div key={index} onClick={() => toggleOnboardingStatus(index)} className="glass-cutout" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', border: '1px solid var(--cutout-border)', transition: 'all 0.2s', cursor: 'pointer' }} onMouseEnter={e=>{e.currentTarget.style.background='var(--nav-active-bg)'; e.currentTarget.style.transform='translateX(4px)'}} onMouseLeave={e=>{e.currentTarget.style.background='var(--cutout-bg)'; e.currentTarget.style.transform='translateX(0)'}}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: item.status === 'Done' ? 'rgba(16, 185, 129, 0.15)' : 'var(--nav-active-bg)', color: item.status === 'Done' ? 'var(--color-accent)' : 'var(--color-text-secondary)', border: item.status === 'Done' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--cutout-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
                     {item.status === 'Done' ? 'check' : ''}
                   </span>
                 </div>
-                <span style={{ fontSize: '14px', fontWeight: 600, opacity: item.status === 'Done' ? 0.5 : 1, textDecoration: item.status === 'Done' ? 'line-through' : 'none', transition: 'all 0.3s' }}>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: item.status === 'Done' ? 'var(--color-text-secondary)' : 'var(--color-primary)', textDecoration: item.status === 'Done' ? 'line-through' : 'none', transition: 'all 0.3s' }}>
                   {item.task}
                 </span>
               </div>
@@ -492,13 +520,13 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
       {/* Tabs Section */}
       <div style={{ gridColumn: 'span 3' }}>
         <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--glass-border-light)', background: 'rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--cutout-border)', background: 'var(--cutout-bg)' }}>
             {[
               { id: 'personal', label: 'Personal Details', icon: 'person' },
               { id: 'employment', label: 'Employment Details', icon: 'work' },
               { id: 'skills', label: 'Skills & Certifications', icon: 'workspace_premium' }
             ].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ padding: '20px 32px', background: activeTab === tab.id ? 'transparent' : 'transparent', border: 'none', borderBottom: activeTab === tab.id ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', opacity: activeTab === tab.id ? 1 : 0.6 }}>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ padding: '20px 32px', background: 'transparent', border: 'none', borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent', color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', opacity: activeTab === tab.id ? 1 : 0.7 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{tab.icon}</span>
                 {tab.label}
               </button>
@@ -508,20 +536,20 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
           <div style={{ padding: '32px' }}>
             {activeTab === 'personal' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                <div className="glass-cutout" style={{ padding: '24px' }}>
-                  <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', textTransform: 'uppercase', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>Basic Info</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Date of Birth</span><span style={{ fontWeight: 600 }}>Jan 15, 1990</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Gender</span><span style={{ fontWeight: 600 }}>Female</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Nationality</span><span style={{ fontWeight: 600 }}>American</span></div>
+                <div className="glass-cutout" style={{ padding: '24px', border: '1px solid var(--cutout-border)' }}>
+                  <h4 className="text-metadata" style={{ marginBottom: '16px' }}>Basic Info</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Date of Birth</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>Jan 15, 1990</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Gender</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>Female</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Nationality</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>American</span></div>
                   </div>
                 </div>
-                <div className="glass-cutout" style={{ padding: '24px' }}>
-                  <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', textTransform: 'uppercase', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>Emergency Contact</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Name</span><span style={{ fontWeight: 600 }}>Michael Jenkins</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Relationship</span><span style={{ fontWeight: 600 }}>Spouse</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Phone</span><span style={{ fontWeight: 600 }}>+1 (555) 987-6543</span></div>
+                <div className="glass-cutout" style={{ padding: '24px', border: '1px solid var(--cutout-border)' }}>
+                  <h4 className="text-metadata" style={{ marginBottom: '16px' }}>Emergency Contact</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Name</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>Michael Jenkins</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Relationship</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>Spouse</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Phone</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>+1 (555) 987-6543</span></div>
                   </div>
                 </div>
               </div>
@@ -529,34 +557,34 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
             
             {activeTab === 'employment' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                <div className="glass-cutout" style={{ padding: '24px' }}>
-                  <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', textTransform: 'uppercase', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>Job Information</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Department</span><span style={{ fontWeight: 600 }}>{user?.departmentId?.name || 'Engineering'}</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Designation</span><span style={{ fontWeight: 600 }}>{user?.designationId?.name || 'Senior Frontend Engineer'}</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Manager</span><span style={{ fontWeight: 600 }}>Alex Rivera</span></div>
+                <div className="glass-cutout" style={{ padding: '24px', border: '1px solid var(--cutout-border)' }}>
+                  <h4 className="text-metadata" style={{ marginBottom: '16px' }}>Job Information</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Department</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{user?.departmentId?.name || 'Engineering'}</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Designation</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{user?.designationId?.name || 'Senior Frontend Engineer'}</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Manager</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>Alex Rivera</span></div>
                   </div>
                 </div>
-                <div className="glass-cutout" style={{ padding: '24px' }}>
-                  <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', textTransform: 'uppercase', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>Tenure</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Hire Date</span><span style={{ fontWeight: 600 }}>March 12, 2024</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Employment Type</span><span style={{ fontWeight: 600 }}>Full-Time</span></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ opacity: 0.7 }}>Status</span><span style={{ fontWeight: 600, color: '#10b981' }}>Active</span></div>
+                <div className="glass-cutout" style={{ padding: '24px', border: '1px solid var(--cutout-border)' }}>
+                  <h4 className="text-metadata" style={{ marginBottom: '16px' }}>Tenure</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Hire Date</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>March 12, 2024</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Employment Type</span><span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>Full-Time</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-text-secondary)' }}>Status</span><span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>Active</span></div>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'skills' && (
-              <div className="glass-cutout" style={{ padding: '24px' }}>
+              <div className="glass-cutout" style={{ padding: '24px', border: '1px solid var(--cutout-border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Technical Skills</h4>
+                  <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--color-primary)' }}>Technical Skills</h4>
                   <button className="btn btn-glass" style={{ padding: '6px 12px', fontSize: '13px' }} onClick={() => showToast('Skill Addition', 'success', 'Request to add skill submitted')}>+ Add Skill</button>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   {['React', 'TypeScript', 'Node.js', 'GraphQL', 'AWS', 'Figma', 'System Architecture'].map(skill => (
-                    <div key={skill} style={{ padding: '8px 16px', background: 'rgba(56,189,248,0.1)', color: '#38bdf8', border: '1px solid rgba(56,189,248,0.2)', borderRadius: '20px', fontSize: '13px', fontWeight: 600 }}>
+                    <div key={skill} style={{ padding: '8px 16px', background: 'var(--nav-active-bg)', color: 'var(--color-ui-element)', border: '1px solid var(--cutout-border)', borderRadius: '20px', fontSize: '13px', fontWeight: 600 }}>
                       {skill}
                     </div>
                   ))}
@@ -569,16 +597,16 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
 
       {showEditProfileModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-panel" style={{ width: '450px', padding: '32px' }}>
-            <h3 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: 800 }}>Edit Profile</h3>
+          <div className="glass-panel" style={{ width: '450px', padding: '32px', border: '1px solid var(--cutout-border)' }}>
+            <h3 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: 800, color: 'var(--color-primary)' }}>Edit Profile</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Phone Number</label>
-                <input type="text" value={profilePhone} onChange={e => setProfilePhone(e.target.value)} style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none', fontSize: '15px' }} />
+                <input type="text" value={profilePhone} onChange={e => setProfilePhone(e.target.value)} className="form-input" />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Location</label>
-                <input type="text" value={profileLocation} onChange={e => setProfileLocation(e.target.value)} style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none', fontSize: '15px' }} />
+                <input type="text" value={profileLocation} onChange={e => setProfileLocation(e.target.value)} className="form-input" />
               </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '32px' }}>
@@ -694,7 +722,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
               <tr key={emp.id} style={{ borderTop: '1px solid var(--cutout-bg)', transition: 'all 0.2s', cursor: 'pointer' }} onMouseEnter={e=>e.currentTarget.style.background='var(--glass-border-light)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                 <td style={{ padding: '16px 24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #38bdf8, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#fff', fontWeight: 700, boxShadow: '0 4px 12px rgba(56,189,248,0.3)' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--nav-active-bg)', border: '1px solid var(--cutout-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: 'var(--color-primary)', fontWeight: 700, boxShadow: '0 2px 8px var(--glass-shadow)' }}>
                       {emp.name.split(' ').map((n: string) => n[0]).join('')}
                     </div>
                     <div>
@@ -725,7 +753,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
                     className="btn btn-glass" style={{ padding: '8px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     onClick={() => handleViewProfile(emp.raw?._id || emp.raw?.id || emp.id)}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#38bdf8' }}>visibility</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--color-ui-element)' }}>visibility</span>
                     View Profile
                   </button>
                 </td>
@@ -742,7 +770,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
     <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '32px' }}>
       <div className="glass-panel" style={{ padding: '24px', height: 'fit-content' }}>
         <h3 style={{ margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 800 }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(56,189,248,0.1)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--nav-active-bg)', color: 'var(--color-ui-element)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--cutout-border)' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>search</span>
           </div>
           Select User
@@ -759,8 +787,8 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
                   borderRadius: '16px', 
                   cursor: 'pointer',
                   background: isSelected ? 'var(--color-background-base)' : 'var(--color-glass-surface)',
-                  border: isSelected ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.6)',
-                  boxShadow: isSelected ? '0 4px 16px rgba(56,189,248,0.15)' : 'none',
+                  border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--cutout-border)',
+                  boxShadow: isSelected ? '0 4px 16px var(--glass-shadow)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
@@ -769,7 +797,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
                 onMouseEnter={e => { if(!isSelected) e.currentTarget.style.background = 'var(--cutout-border)' }}
                 onMouseLeave={e => { if(!isSelected) e.currentTarget.style.background = 'var(--color-glass-surface)' }}
               >
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: isSelected ? '#38bdf8' : 'var(--cutout-bg)', color: isSelected ? '#fff' : 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: isSelected ? 'var(--color-primary)' : 'var(--cutout-bg)', color: isSelected ? 'var(--color-background-base)' : 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person</span>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -784,7 +812,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
 
       <div className="glass-panel" style={{ padding: '40px' }}>
         <h2 style={{ margin: '0 0 32px 0', display: 'flex', alignItems: 'center', gap: '16px', fontSize: '28px', fontWeight: 800 }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(139,92,246,0.1)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--nav-active-bg)', color: 'var(--color-ui-element)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--cutout-border)' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>devices</span>
           </div>
           Hardware & Software Assets
@@ -794,7 +822,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
           <>
             <div style={{ background: 'var(--cutout-bg)', padding: '24px', borderRadius: '20px', border: '1px solid var(--cutout-border)', marginBottom: '32px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
-                 <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #8b5cf6, #38bdf8)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 4px 16px rgba(139,92,246,0.3)' }}>
+                 <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--nav-active-bg)', border: '2px solid var(--cutout-border)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 4px 16px var(--glass-shadow)' }}>
                     {selectedEmployee.name.split(' ').map((n: string) => n[0]).join('')}
                  </div>
                  <div>
@@ -1147,79 +1175,108 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Role *</label>
                 <select required value={onboardingForm.designationId} onChange={e => setOnboardingForm({...onboardingForm, designationId: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}>
-                  <option value="" disabled>Select Role</option>
-                  {designations.map(d => <option key={d._id} value={d._id} style={{ color: '#000' }}>{d.title || d.name}</option>)}
+                  <option value="" disabled style={{ color: '#64748b', background: '#1e293b' }}>Select Role</option>
+                  {designations.map(d => <option key={d._id} value={d._id} style={{ color: '#ffffff', background: '#1e293b' }}>{d.title || d.name}</option>)}
                 </select>
               </div>
-                            {/* Skills & Experience */}
-              <div style={{ paddingBottom: '200px' }}>
-              <div style={{ marginTop: '10px' }}>
-                <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>Skills & Experience</h4>
-                {onboardingForm.skills.map((skill, index) => (
-                  <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center' }}>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Python" 
-                      required
-                      value={skill.name} 
-                      onChange={e => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills[index].name = e.target.value;
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ flex: 2, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
-                    />
-                    <select 
-                      value={skill.proficiency} 
-                      required
-                      onChange={e => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills[index].proficiency = e.target.value;
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ flex: 1.5, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}
-                    >
-                      <option value="Beginner" style={{ color: '#000' }}>Beginner</option>
-                      <option value="Intermediate" style={{ color: '#000' }}>Intermediate</option>
-                      <option value="Advanced" style={{ color: '#000' }}>Advanced</option>
-                      <option value="Expert" style={{ color: '#000' }}>Expert</option>
-                    </select>
-                    <input 
-                      type="number" 
-                      placeholder="Years" 
-                      min="0"
-                      required
-                      value={skill.yearsOfExperience} 
-                      onChange={e => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills[index].yearsOfExperience = Number(e.target.value);
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
-                    />
-                    <button 
-                      type="button" 
-                      onClick={() => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills.splice(index, 1);
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }}
-                    >
-                      <span className="material-symbols-outlined">close</span>
-                    </button>
-                  </div>
-                ))}
-                <button 
-                  type="button" 
-                  className="btn btn-glass" 
-                  style={{ padding: '8px 16px', fontSize: '13px' }}
-                  onClick={() => setOnboardingForm({ ...onboardingForm, skills: [...onboardingForm.skills, { name: '', proficiency: 'Intermediate', yearsOfExperience: 1 }] })}
-                >
-                  + Add Skill
-                </button>
-              </div>
-
+              {/* Skills & Experience */}
+              <div style={{ paddingBottom: '160px' }}>
+                <div style={{ marginTop: '10px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>Skills & Experience</h4>
+                  {onboardingForm.skills.map((skill, index) => (
+                    <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center' }}>
+                      <div style={{ position: 'relative', flex: 2 }}>
+                        <input 
+                          type="text" 
+                          placeholder="Search skill (e.g. Python)" 
+                          required
+                          value={skill.name} 
+                          onChange={e => {
+                            const newSkills = [...onboardingForm.skills];
+                            newSkills[index].name = e.target.value;
+                            setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                          }}
+                          onFocus={() => setFocusedSkillIndex(index)}
+                          onBlur={() => setTimeout(() => setFocusedSkillIndex(null), 200)}
+                          style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
+                        />
+                        {focusedSkillIndex === index && (
+                          <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', zIndex: 9999, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}>
+                            {availableSkills
+                              .filter(s => (s.canonicalName || s.name || '').toLowerCase().includes((skill.name || '').toLowerCase()))
+                              .map(s => (
+                                <div 
+                                  key={s._id} 
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    const newSkills = [...onboardingForm.skills];
+                                    newSkills[index].name = s.canonicalName || s.name;
+                                    setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                                    setFocusedSkillIndex(null);
+                                  }}
+                                  style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '13px', color: '#f8fafc', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(56,189,248,0.2)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  {s.canonicalName || s.name}
+                                </div>
+                              ))}
+                            {availableSkills.filter(s => (s.canonicalName || s.name || '').toLowerCase().includes((skill.name || '').toLowerCase())).length === 0 && (
+                              <div style={{ padding: '10px 12px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>No matches</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <select 
+                        value={skill.proficiency} 
+                        required
+                        onChange={e => {
+                          const newSkills = [...onboardingForm.skills];
+                          newSkills[index].proficiency = e.target.value;
+                          setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                        }} 
+                        style={{ flex: 1.5, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}
+                      >
+                        <option value="Beginner" style={{ color: '#ffffff', background: '#1e293b' }}>Beginner</option>
+                        <option value="Intermediate" style={{ color: '#ffffff', background: '#1e293b' }}>Intermediate</option>
+                        <option value="Advanced" style={{ color: '#ffffff', background: '#1e293b' }}>Advanced</option>
+                        <option value="Expert" style={{ color: '#ffffff', background: '#1e293b' }}>Expert</option>
+                      </select>
+                      <input 
+                        type="number" 
+                        placeholder="Years" 
+                        min="0"
+                        required
+                        value={skill.yearsOfExperience} 
+                        onChange={e => {
+                          const newSkills = [...onboardingForm.skills];
+                          newSkills[index].yearsOfExperience = Number(e.target.value);
+                          setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                        }} 
+                        style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newSkills = [...onboardingForm.skills];
+                          newSkills.splice(index, 1);
+                          setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                        }} 
+                        style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }}
+                      >
+                        <span className="material-symbols-outlined">close</span>
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    type="button" 
+                    className="btn btn-glass" 
+                    style={{ padding: '8px 16px', fontSize: '13px' }}
+                    onClick={() => setOnboardingForm({ ...onboardingForm, skills: [...onboardingForm.skills, { name: '', proficiency: 'Intermediate', yearsOfExperience: 1 }] })}
+                  >
+                    + Add Skill
+                  </button>
+                </div>
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button type="button" onClick={() => setShowOnboardingModal(false)} className="btn btn-glass" style={{ padding: '10px 20px' }}>Cancel</button>
@@ -1240,7 +1297,7 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
                 <select required value={offboardingForm.employeeId} onChange={e => setOffboardingForm({...offboardingForm, employeeId: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}>
                   <option value="" disabled>Select an employee</option>
                   {employees.filter(e => e.raw?.status === 'ACTIVE').map(emp => (
-                    <option key={emp.raw._id} value={emp.raw._id} style={{ color: '#000' }}>{emp.name} ({emp.id})</option>
+                    <option key={emp.raw._id} value={emp.raw._id} style={{ color: '#ffffff', background: '#1e293b' }}>{emp.name} ({emp.id})</option>
                   ))}
                 </select>
               </div>
@@ -1248,76 +1305,8 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Reason (Optional)</label>
                 <textarea value={offboardingForm.reason} onChange={e => setOffboardingForm({...offboardingForm, reason: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none', minHeight: '80px', fontFamily: 'inherit' }} placeholder="Provide a reason for offboarding..." />
               </div>
-                            {/* Skills & Experience */}
-              <div style={{ marginTop: '10px' }}>
-                <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>Skills & Experience</h4>
-                {onboardingForm.skills.map((skill, index) => (
-                  <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center' }}>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Python" 
-                      required
-                      value={skill.name} 
-                      onChange={e => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills[index].name = e.target.value;
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ flex: 2, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
-                    />
-                    <select 
-                      value={skill.proficiency} 
-                      required
-                      onChange={e => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills[index].proficiency = e.target.value;
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ flex: 1.5, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}
-                    >
-                      <option value="Beginner" style={{ color: '#000' }}>Beginner</option>
-                      <option value="Intermediate" style={{ color: '#000' }}>Intermediate</option>
-                      <option value="Advanced" style={{ color: '#000' }}>Advanced</option>
-                      <option value="Expert" style={{ color: '#000' }}>Expert</option>
-                    </select>
-                    <input 
-                      type="number" 
-                      placeholder="Years" 
-                      min="0"
-                      required
-                      value={skill.yearsOfExperience} 
-                      onChange={e => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills[index].yearsOfExperience = Number(e.target.value);
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
-                    />
-                    <button 
-                      type="button" 
-                      onClick={() => {
-                        const newSkills = [...onboardingForm.skills];
-                        newSkills.splice(index, 1);
-                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
-                      }} 
-                      style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }}
-                    >
-                      <span className="material-symbols-outlined">close</span>
-                    </button>
-                  </div>
-                ))}
-                <button 
-                  type="button" 
-                  className="btn btn-glass" 
-                  style={{ padding: '8px 16px', fontSize: '13px' }}
-                  onClick={() => setOnboardingForm({ ...onboardingForm, skills: [...onboardingForm.skills, { name: '', proficiency: 'Intermediate', yearsOfExperience: 1 }] })}
-                >
-                  + Add Skill
-                </button>
-              </div>
-
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
-                <button type="button" onClick={() => setShowOnboardingModal(false)} className="btn btn-glass" style={{ padding: '10px 20px' }}>Cancel</button>
+                <button type="button" onClick={() => setShowOffboardingModal(false)} className="btn btn-glass" style={{ padding: '10px 20px' }}>Cancel</button>
                 <button type="submit" disabled={isSubmitting} style={{ padding: '10px 24px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>{isSubmitting ? 'Processing...' : 'Confirm Offboarding'}</button>
               </div>
             </form>

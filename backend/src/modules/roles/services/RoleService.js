@@ -30,42 +30,42 @@ export class RoleService {
         name: 'HR Manager',
         description: 'System template: Full control over personnel, attendance, leaves, and onboarding invitations.',
         priority: 20,
-        permissions: allPermStrings.filter(p => p.startsWith('user.') || p.startsWith('attendance.') || p.startsWith('leave.') || p.startsWith('department.') || p.startsWith('recruitment.') || p === PERMISSIONS.ROLE.ASSIGN || p === PERMISSIONS.ROLE.READ || p === PERMISSIONS.INVITE.CREATE || p === PERMISSIONS.INVITE.REVOKE || p.startsWith('ai.')),
+        permissions: allPermStrings.filter(p => p.startsWith('user.') || p.startsWith('attendance.') || p.startsWith('leave.') || p.startsWith('department.') || p.startsWith('designation.') || p.startsWith('location.') || p.startsWith('shift.') || p.startsWith('recruitment.') || p === PERMISSIONS.ROLE.ASSIGN || p === PERMISSIONS.ROLE.READ || p === PERMISSIONS.INVITE.CREATE || p === PERMISSIONS.INVITE.REVOKE || p.startsWith('ai.')),
         isSystemTemplate: true
       },
       {
         name: 'Finance Executive',
         description: 'System template: Full control over payroll calculations, ledger locking, and salary viewing.',
         priority: 30,
-        permissions: [PERMISSIONS.PAYROLL.RUN, PERMISSIONS.PAYROLL.LOCK, PERMISSIONS.PAYROLL.VIEW_SALARY, PERMISSIONS.USER.READ, PERMISSIONS.ATTENDANCE.APPROVE, PERMISSIONS.LEAVE.REQUEST_APPROVE, PERMISSIONS.AI.USE, PERMISSIONS.AI.EXECUTE_TOOL, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
+        permissions: [PERMISSIONS.PAYROLL.RUN, PERMISSIONS.PAYROLL.LOCK, PERMISSIONS.PAYROLL.VIEW_SALARY, PERMISSIONS.USER.READ, PERMISSIONS.ATTENDANCE.APPROVE, PERMISSIONS.LEAVE.REQUEST_APPROVE, PERMISSIONS.AI.USE, PERMISSIONS.AI.EXECUTE_TOOL, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.DESIGNATION.READ, PERMISSIONS.LOCATION.READ, PERMISSIONS.SHIFT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
         isSystemTemplate: true
       },
       {
         name: 'Department Manager',
         description: 'System template: Approval authority over subordinate attendance regularizations and leave applications.',
         priority: 50,
-        permissions: [PERMISSIONS.ATTENDANCE.MARK, PERMISSIONS.ATTENDANCE.APPROVE, PERMISSIONS.LEAVE.REQUEST_SUBMIT, PERMISSIONS.LEAVE.REQUEST_APPROVE, PERMISSIONS.USER.READ, PERMISSIONS.USER.READ_SELF, PERMISSIONS.INVITE.CREATE, PERMISSIONS.AI.USE, PERMISSIONS.AI.EXECUTE_TOOL, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
+        permissions: [PERMISSIONS.ATTENDANCE.MARK, PERMISSIONS.ATTENDANCE.APPROVE, PERMISSIONS.LEAVE.REQUEST_SUBMIT, PERMISSIONS.LEAVE.REQUEST_APPROVE, PERMISSIONS.USER.READ, PERMISSIONS.USER.READ_SELF, PERMISSIONS.INVITE.CREATE, PERMISSIONS.AI.USE, PERMISSIONS.AI.EXECUTE_TOOL, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.DESIGNATION.READ, PERMISSIONS.LOCATION.READ, PERMISSIONS.SHIFT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
         isSystemTemplate: true
       },
       {
         name: 'Standard Employee',
         description: 'System template: Basic access for daily attendance marking and leave application submission.',
         priority: 80,
-        permissions: [PERMISSIONS.ATTENDANCE.MARK, PERMISSIONS.LEAVE.REQUEST_SUBMIT, PERMISSIONS.USER.READ_SELF, PERMISSIONS.AI.USE, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
+        permissions: [PERMISSIONS.ATTENDANCE.MARK, PERMISSIONS.LEAVE.REQUEST_SUBMIT, PERMISSIONS.USER.READ_SELF, PERMISSIONS.AI.USE, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.DESIGNATION.READ, PERMISSIONS.LOCATION.READ, PERMISSIONS.SHIFT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
         isSystemTemplate: true
       },
       {
         name: 'Administrator',
         description: 'System template: General administrative control across operations and personnel.',
         priority: 10,
-        permissions: allPermStrings.filter(p => p.startsWith('user.') || p.startsWith('attendance.') || p.startsWith('department.') || p === PERMISSIONS.ROLE.READ || p === PERMISSIONS.INVITE.CREATE || p === PERMISSIONS.INVITE.REVOKE || p.startsWith('ai.')),
+        permissions: allPermStrings.filter(p => p.startsWith('user.') || p.startsWith('attendance.') || p.startsWith('department.') || p.startsWith('designation.') || p.startsWith('location.') || p.startsWith('shift.') || p === PERMISSIONS.ROLE.READ || p === PERMISSIONS.INVITE.CREATE || p === PERMISSIONS.INVITE.REVOKE || p.startsWith('ai.')),
         isSystemTemplate: true
       },
       {
         name: 'Intern',
         description: 'System template: Limited access for interns and temporary staff.',
         priority: 90,
-        permissions: [PERMISSIONS.ATTENDANCE.MARK, PERMISSIONS.LEAVE.REQUEST_SUBMIT, PERMISSIONS.USER.READ_SELF, PERMISSIONS.AI.USE, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
+        permissions: [PERMISSIONS.ATTENDANCE.MARK, PERMISSIONS.LEAVE.REQUEST_SUBMIT, PERMISSIONS.USER.READ_SELF, PERMISSIONS.AI.USE, PERMISSIONS.DEPARTMENT.READ, PERMISSIONS.DESIGNATION.READ, PERMISSIONS.LOCATION.READ, PERMISSIONS.SHIFT.READ, PERMISSIONS.RECRUITMENT.JOB.VIEW],
         isSystemTemplate: true
       }
     ];

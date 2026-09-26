@@ -22,7 +22,12 @@ export const createEmployeeSchema = z.object({
     shiftId: objectId.optional(),
     managerId: objectId.nullable().optional(),
     joiningDate: z.string().datetime({ message: 'joiningDate must be a valid ISO date.' }),
-    metadata: z.record(z.unknown()).optional()
+    metadata: z.record(z.unknown()).optional(),
+    skills: z.array(z.object({
+      name: z.string(),
+      proficiency: z.string().optional(),
+      yearsOfExperience: z.number().optional()
+    })).optional()
   })
 });
 
