@@ -16,10 +16,10 @@ export const createEmployeeSchema = z.object({
     firstName: z.string().min(1, 'First name is required.').max(100),
     lastName: z.string().min(1, 'Last name is required.').max(100),
     workEmail: z.string().email('Invalid email address.').max(255).optional().nullable(),
-    departmentId: objectId,
+    departmentId: objectId.optional(),
     designationId: objectId,
-    locationId: objectId,
-    shiftId: objectId,
+    locationId: objectId.optional(),
+    shiftId: objectId.optional(),
     managerId: objectId.nullable().optional(),
     joiningDate: z.string().datetime({ message: 'joiningDate must be a valid ISO date.' }),
     metadata: z.record(z.unknown()).optional()

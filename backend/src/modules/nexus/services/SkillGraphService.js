@@ -131,6 +131,7 @@ class SkillGraphService {
         continue;
       }
 
+      const profile = profileMap.get(empIdStr);
       const designationTitle = designationTitleMap.get(emp.designationId?.toString()) || 'Unknown Designation';
       
       addNode({
@@ -138,7 +139,9 @@ class SkillGraphService {
         type: 'employee',
         label: `${emp.firstName} ${emp.lastName}`,
         metadata: {
-          designation: designationTitle
+          designation: designationTitle,
+          totalExperienceYears: profile?.totalExperienceYears || 0,
+          projectsWorkedCount: profile?.projects?.length || 0
         }
       });
 
@@ -152,7 +155,6 @@ class SkillGraphService {
       }
 
       // Edge: HAS_SKILL
-      const profile = profileMap.get(empIdStr);
       if (profile && profile.employeeSkills) {
         for (const skill of profile.employeeSkills) {
           const skillIdStr = skill.skillId.toString();
@@ -161,6 +163,7 @@ class SkillGraphService {
           skillIdsToFetch.add(skillIdStr);
           addEdge(empIdStr, skillIdStr, 'HAS_SKILL', {
             proficiency: skill.proficiency,
+            yearsOfExperience: skill.yearsOfExperience,
             source: skill.source,
             confidence: skill.confidence,
             verificationStatus: skill.verificationStatus

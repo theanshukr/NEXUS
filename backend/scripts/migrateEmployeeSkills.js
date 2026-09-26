@@ -161,16 +161,22 @@ const runMigration = async (dryRun = false) => {
     // Print Examples
     if (profiles.length > 0) {
       console.log('\nEXAMPLES:');
-      
-      // Let's show up to 5 examples
+
+      // Let's show up to 5 examples (null-safe: never crash after a successful save)
       let printed = 0;
       for (const sampleProfile of profiles) {
         if (printed >= 5) break;
         if (sampleProfile.skills && sampleProfile.skills.length > 0) {
           const legacy = sampleProfile.skills[0];
-          const newRel = sampleProfile.employeeSkills.find(s => s.skillId.toString() === skillCache[sampleProfile.organizationId.toString()][normalizeSkillName(legacy.name)]._id.toString());
-          const canonical = skillCache[sampleProfile.organizationId.toString()][normalizeSkillName(legacy.name)];
-          
+          const orgCache = skillCache[sampleProfile.organizationId.toString()] || {};
+          const canonical = orgCache[normalizeSkillName(legacy.name)];
+
+          if (!canonical) continue; // skill was skipped as invalid — nothing to show
+
+          const newRel = (sampleProfile.employeeSkills || []).find(
+            s => s.skillId && canonical._id && s.skillId.toString() === canonical._id.toString()
+          );
+
           let empName = 'Unknown Employee';
           if (sampleProfile.employeeId) {
             empName = `${sampleProfile.employeeId.firstName || ''} ${sampleProfile.employeeId.lastName || ''}`.trim();

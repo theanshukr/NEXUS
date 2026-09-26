@@ -20,7 +20,12 @@ export default function ProjectManagementView({ role, user }: { role: string, us
   const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'MEDIUM', deadline: '' });
   
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [newProject, setNewProject] = useState({ name: '', description: '', dueDate: '' });
+  const [newProject, setNewProject] = useState<{ name: string, description: string, dueDate: string, requiredSkillIds: string[] }>({ name: '', description: '', dueDate: '', requiredSkillIds: [] });
+  
+  const [availableSkills, setAvailableSkills] = useState<any[]>([]);
+  const [skillSearchTerm, setSkillSearchTerm] = useState('');
+  const [isSkillsLoading, setIsSkillsLoading] = useState(false);
+  const [skillsError, setSkillsError] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,8 +50,27 @@ export default function ProjectManagementView({ role, user }: { role: string, us
     }
   };
 
+  const fetchSkills = async () => {
+    setIsSkillsLoading(true);
+    setSkillsError(false);
+    try {
+      const res = await apiClient.get('/nexus/skills');
+      if (res.data?.data) {
+        setAvailableSkills(res.data.data);
+      } else if (Array.isArray(res.data)) {
+        setAvailableSkills(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch skills:', err);
+      setSkillsError(true);
+    } finally {
+      setIsSkillsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProjectsAndTasks();
+    fetchSkills();
   }, []);
 
   const handleCreateTask = async () => {
@@ -77,7 +101,7 @@ export default function ProjectManagementView({ role, user }: { role: string, us
     try {
       await apiClient.post('/projects', newProject);
       showToast('Success', 'success', 'Project created successfully');
-      setNewProject({ name: '', description: '', dueDate: '' });
+      setNewProject({ name: '', description: '', dueDate: '', requiredSkillIds: [] });
       setIsProjectModalOpen(false);
       fetchProjectsAndTasks();
     } catch (err: any) {
@@ -430,6 +454,69 @@ export default function ProjectManagementView({ role, user }: { role: string, us
                 onChange={(e) => setNewProject({ ...newProject, dueDate: e.target.value })}
                 style={{ width: '100%', padding: '12px 16px', background: 'var(--cutout-bg)', border: '1px solid var(--cutout-border)', borderRadius: '8px', color: 'inherit', outline: 'none', colorScheme: 'dark' }}
               />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Required Skills</label>
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                {newProject.requiredSkillIds.map(skillId => {
+                  const skill = availableSkills.find(s => s._id === skillId || s.id === skillId);
+                  return skill ? (
+                    <div key={skillId} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--color-primary)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>
+                      {skill.canonicalName}
+                      <span 
+                        className="material-symbols-outlined" 
+                        style={{ fontSize: '14px', cursor: 'pointer' }}
+                        onClick={() => setNewProject(prev => ({ ...prev, requiredSkillIds: prev.requiredSkillIds.filter(id => id !== skillId) }))}
+                      >
+                        close
+                      </span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+
+              <input 
+                type="text" 
+                value={skillSearchTerm}
+                onChange={(e) => setSkillSearchTerm(e.target.value)}
+                placeholder="Search and select skills..."
+                style={{ width: '100%', padding: '12px 16px', background: 'var(--cutout-bg)', border: '1px solid var(--cutout-border)', borderRadius: '8px', color: 'inherit', outline: 'none' }}
+              />
+
+              {skillSearchTerm && (
+                <div style={{ maxHeight: '150px', overflowY: 'auto', background: 'var(--cutout-bg)', border: '1px solid var(--cutout-border)', borderRadius: '8px', marginTop: '4px' }}>
+                  {isSkillsLoading ? (
+                    <div style={{ padding: '8px 16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>Loading skills...</div>
+                  ) : skillsError ? (
+                    <div style={{ padding: '8px 16px', fontSize: '13px', color: '#ef4444' }}>Unable to load skills</div>
+                  ) : (
+                    <>
+                      {availableSkills
+                        .filter(s => (s.canonicalName || '').toLowerCase().includes(skillSearchTerm.toLowerCase()))
+                        .filter(s => !newProject.requiredSkillIds.includes(s._id) && !newProject.requiredSkillIds.includes(s.id))
+                        .map(skill => (
+                          <div 
+                            key={skill._id || skill.id}
+                            style={{ padding: '8px 16px', cursor: 'pointer', fontSize: '13px' }}
+                            className="hover-bg interactive"
+                            onClick={() => {
+                              setNewProject(prev => ({ ...prev, requiredSkillIds: [...prev.requiredSkillIds, skill._id || skill.id] }));
+                              setSkillSearchTerm('');
+                            }}
+                          >
+                            {skill.canonicalName}
+                          </div>
+                        ))
+                      }
+                      {availableSkills.filter(s => (s.canonicalName || '').toLowerCase().includes(skillSearchTerm.toLowerCase())).length === 0 && (
+                        <div style={{ padding: '8px 16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>No matching skills found</div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>

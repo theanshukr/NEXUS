@@ -38,6 +38,9 @@ router.get('/samples/workforce', NexusProfileController.getSampleWorkforce);
 // Skill Intelligence API (Phase 5C)
 // ---------------------------------------------------------------------------
 
+// GET /api/v1/nexus/skills
+router.get('/skills', SkillIntelligenceController.getAllSkills);
+
 // POST /api/v1/nexus/skills/extract
 router.post('/skills/extract', SkillIntelligenceController.extractSkills);
 

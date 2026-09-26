@@ -65,8 +65,7 @@ const employeeSchema = new mongoose.Schema({
   // ---- Structural Fields (accessible via dedicated workflow PUT endpoints only) ----
   departmentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department',
-    required: true
+    ref: 'Department'
   },
   designationId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -75,13 +74,11 @@ const employeeSchema = new mongoose.Schema({
   },
   locationId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Location',
-    required: true
+    ref: 'Location'
   },
   shiftId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Shift',
-    required: true
+    ref: 'Shift'
   },
   // Self-referential: the employee's direct manager. May be null for top-level employees.
   managerId: {

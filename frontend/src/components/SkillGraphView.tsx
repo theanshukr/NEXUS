@@ -3,7 +3,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { apiClient } from '../api/client';
 
 export default function SkillGraphView({ role, user }: { role: string; user?: any }) {
-  const [graphData, setGraphData] = useState({ nodes: [], edges: [], stats: {} });
+  const [graphData, setGraphData] = useState<{ nodes: any[]; edges: any[]; stats: any }>({ nodes: [], edges: [], stats: {} });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -15,7 +15,7 @@ export default function SkillGraphView({ role, user }: { role: string; user?: an
   // Filters
   const [nodeTypeFilter, setNodeTypeFilter] = useState<string>('all');
   
-  const graphRef = useRef<any>();
+  const graphRef = useRef<any>(null);
 
   const loadGraph = useCallback(async () => {
     try {
@@ -112,7 +112,7 @@ export default function SkillGraphView({ role, user }: { role: string; user?: an
       return nodeIds.has(srcId) && nodeIds.has(tgtId);
     });
 
-    return { nodes, edges };
+    return { nodes, links: edges };
   }, [graphData, nodeTypeFilter, searchQuery]);
 
   const getNodeColor = (type: string) => {
@@ -145,7 +145,7 @@ export default function SkillGraphView({ role, user }: { role: string; user?: an
               placeholder="Search graph..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: '38px', paddingRight: '16px', py: '8px', borderRadius: '20px', border: '1px solid var(--cutout-border)', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', width: '220px' }}
+              style={{ paddingLeft: '38px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px', borderRadius: '20px', border: '1px solid var(--cutout-border)', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text)', width: '220px' }}
             />
           </div>
           

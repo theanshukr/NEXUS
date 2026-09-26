@@ -6,6 +6,25 @@ import { ValidationError, NotFoundError } from '../../../core/errors/AppError.js
 class SkillIntelligenceController {
   
   /**
+   * GET /api/v1/nexus/skills
+   * Fetch all canonical skills for the organization.
+   */
+  async getAllSkills(req, res, next) {
+    try {
+      const organizationId = req.user.organizationId;
+      const mongoose = await import('mongoose');
+      const Skill = mongoose.model('Skill');
+      const skills = await Skill.find({ organizationId }).lean();
+      res.status(200).json({
+        success: true,
+        data: skills
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * POST /api/v1/nexus/skills/extract
    * Extracts and normalizes skills from raw text.
    */

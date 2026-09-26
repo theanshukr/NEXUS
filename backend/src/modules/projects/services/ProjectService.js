@@ -7,7 +7,7 @@ class ProjectService {
   }
 
   async createProject(organizationId, data) {
-    return projectRepo.create({ organizationId, ...data });
+    return projectRepo.createScoped(data, organizationId);
   }
 
   async getAllTasks(organizationId) {
@@ -15,7 +15,7 @@ class ProjectService {
   }
 
   async createTask(organizationId, data) {
-    return taskRepo.create({ organizationId, ...data });
+    return taskRepo.createScoped(data, organizationId);
   }
 
   async updateTaskStatus(organizationId, taskId, status) {

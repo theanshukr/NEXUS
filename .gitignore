@@ -35,7 +35,15 @@ backend/admin_token.txt
 *.sln
 *.sw?
 
-# Temporary test scripts
+# Python
+.venv
+**/.venv
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary test and scratch scripts
 test_db.js
 listUsers.js
 backend/check_*.js
@@ -44,8 +52,10 @@ backend/test_*.js
 backend/get_token.js
 backend/flush_cache.js
 backend/seed_roles.js
+scratch_*.js
 stitch_screen.html
 frontend/patch_dashboards.*
 
 # Local deployment folders
 .netlify
+

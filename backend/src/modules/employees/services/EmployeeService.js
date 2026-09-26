@@ -7,6 +7,10 @@ import { EVENTS } from '#@/core/constants/events/index.js';
 import { runInTransaction } from '#@/platform/database/db.js';
 import { ValidationError, NotFoundError, ConflictError, ForbiddenError } from '#@/core/errors/AppError.js';
 import InviteService from '#@/modules/invitations/services/InviteService.js';
+import SkillNormalizationService from '../../nexus/services/SkillNormalizationService.js';
+import Skill from '../../nexus/models/Skill.js';
+import EmployeeProfileExtended from '../../nexus/models/EmployeeProfileExtended.js';
+
 
 /**
  * Status Transition Matrix (Architectural Rule).
@@ -58,7 +62,7 @@ export class EmployeeService {
       metadata = {}
     } = payload;
 
-    return await runInTransaction(async (session) => {
+    const employee = await runInTransaction(async (session) => {
       const options = { session };
 
       // Uniqueness: employeeCode
@@ -111,14 +115,67 @@ export class EmployeeService {
 
       logger.info({ organizationId, employeeId: employee._id, code: employee.employeeCode }, 'Created employee');
 
-      EventBus.emit(EVENTS.EMPLOYEE.CREATED, {
-        organizationId,
-        employeeId: employee._id,
-        employeeCode: employee.employeeCode
-      });
-
+      EventBus.emit(EVENTS.EMPLOYEE.CREATED, { organizationId, employeeId: employee._id, employeeCode: employee.employeeCode });
       return employee;
     });
+
+    // PHASE 2: Process Skills & Build Extended Profile
+    if (payload.skills && Array.isArray(payload.skills) && payload.skills.length > 0) {
+      try {
+        const employeeSkills = [];
+        
+        for (const skill of payload.skills) {
+          const normalized = await SkillNormalizationService.normalizeSkill(skill.name, organizationId);
+          let canonicalId = normalized.skillId;
+          
+          if (normalized.matchType === 'UNKNOWN') {
+             // Create canonical Skill
+             const newSkill = await Skill.create({
+               organizationId,
+               canonicalName: normalized.suggestedName,
+               normalizedName: normalized.suggestedName.toLowerCase(),
+               isVerified: true
+             });
+             canonicalId = newSkill._id;
+          }
+
+          employeeSkills.push({
+            skillId: canonicalId,
+            proficiency: skill.proficiency || 'Intermediate',
+            yearsOfExperience: skill.yearsOfExperience || 1,
+            source: 'MANAGER_VERIFIED',
+            confidence: 0.9,
+            verificationStatus: 'VERIFIED',
+            verifiedBy: actor?.userId || null,
+            verifiedAt: new Date()
+          });
+        }
+        
+        // Also populate the plain skills array for legacy compatibility
+        const plainSkills = payload.skills.map(s => ({
+          name: s.name,
+          proficiency: s.proficiency || 'Intermediate',
+          yearsOfExperience: s.yearsOfExperience || 1,
+          source: 'MANAGER_VERIFIED',
+          verificationStatus: 'VERIFIED',
+          verifiedBy: actor?.userId || null,
+          verifiedAt: new Date()
+        }));
+
+        await EmployeeProfileExtended.create({
+          organizationId,
+          employeeId: employee._id,
+          headline: 'Newly Onboarded Employee',
+          skills: plainSkills,
+          employeeSkills: employeeSkills
+        });
+        
+      } catch (err) {
+        logger.error({ err, employeeId: employee._id }, 'Failed to process skills during onboarding');
+      }
+    }
+
+    return employee;
   }
 
   // ---------------------------------------------------------------------------
@@ -608,3 +665,5 @@ export class EmployeeService {
 }
 
 export default new EmployeeService();
+
+

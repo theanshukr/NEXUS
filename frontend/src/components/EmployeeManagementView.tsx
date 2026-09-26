@@ -269,17 +269,10 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [onboardingForm, setOnboardingForm] = useState({
-    employeeCode: '', firstName: '', lastName: '', workEmail: '', joiningDate: '',
-    departmentId: '', designationId: '', locationId: '', shiftId: ''
-  });
+  const [onboardingForm, setOnboardingForm] = useState<{ employeeCode: string; firstName: string; lastName: string; workEmail: string; joiningDate: string; departmentId: string; designationId: string; locationId: string; shiftId: string; skills: Array<{ name: string; proficiency: string; yearsOfExperience: number; }>; }>({ employeeCode: '', firstName: '', lastName: '', workEmail: '', joiningDate: '', departmentId: '', designationId: '', locationId: '', shiftId: '', skills: [] });
   const [offboardingForm, setOffboardingForm] = useState({ employeeId: '', reason: '' });
   
-  const [departments, setDepartments] = useState<any[]>([]);
   const [designations, setDesignations] = useState<any[]>([]);
-  const [locations, setLocations] = useState<any[]>([]);
-  const [shifts, setShifts] = useState<any[]>([]);
-  
   const [fullProfile, setFullProfile] = useState<any>(null);
   const [selectedEmpIdForProfile, setSelectedEmpIdForProfile] = useState<string>('');
   const [isProfileLoading, setIsProfileLoading] = useState(false);
@@ -292,11 +285,8 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
         apiClient.get('/locations'),
         apiClient.get('/shifts')
       ]);
-      setDepartments(depRes.data?.data?.data || []);
-      setDesignations(desRes.data?.data?.data || []);
-      setLocations(locRes.data?.data?.data || []);
-      setShifts(shiftRes.data?.data?.data || []);
-    } catch (err) {
+      setDesignations(desRes.data?.data?.data || desRes.data?.data || []);
+        } catch (err) {
       console.error('Failed to fetch options', err);
     }
   };
@@ -314,6 +304,9 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
     try {
       // Backend expects joiningDate in ISO format, datetime-local provides YYYY-MM-DDTHH:mm
       const payload = { ...onboardingForm, joiningDate: new Date(onboardingForm.joiningDate).toISOString() };
+        delete (payload as any).departmentId;
+        delete (payload as any).locationId;
+        delete (payload as any).shiftId;
       await apiClient.post('/employees', payload);
       showToast('Success', 'success', 'Employee successfully onboarded!');
       setShowOnboardingModal(false);
@@ -616,6 +609,14 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>hub</span>
             Skill Graph
+          </button>
+          <button
+            className="btn btn-primary"
+            style={{ padding: '12px 20px', borderRadius: '12px', background: '#8b5cf6', borderColor: '#8b5cf6', fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}
+            onClick={() => window.location.href = '/skill-graph/hr'}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>insights</span>
+            Workforce Intelligence
           </button>
           <button
             style={{ padding: '12px 24px', background: '#38bdf8', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 16px rgba(56,189,248,0.4)' }}
@@ -1141,41 +1142,85 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Joining Date *</label>
-                <input required type="datetime-local" value={onboardingForm.joiningDate} onChange={e => setOnboardingForm({...onboardingForm, joiningDate: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none', colorScheme: 'dark' }} />
+                <input required type="date" value={onboardingForm.joiningDate} onChange={e => setOnboardingForm({...onboardingForm, joiningDate: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none', colorScheme: 'dark' }} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Department *</label>
-                  <select required value={onboardingForm.departmentId} onChange={e => setOnboardingForm({...onboardingForm, departmentId: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}>
-                    <option value="" disabled>Select Department</option>
-                    {departments.map(d => <option key={d._id} value={d._id} style={{ color: '#000' }}>{d.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Designation *</label>
-                  <select required value={onboardingForm.designationId} onChange={e => setOnboardingForm({...onboardingForm, designationId: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}>
-                    <option value="" disabled>Select Designation</option>
-                    {designations.map(d => <option key={d._id} value={d._id} style={{ color: '#000' }}>{d.name}</option>)}
-                  </select>
-                </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Role *</label>
+                <select required value={onboardingForm.designationId} onChange={e => setOnboardingForm({...onboardingForm, designationId: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}>
+                  <option value="" disabled>Select Role</option>
+                  {designations.map(d => <option key={d._id} value={d._id} style={{ color: '#000' }}>{d.title || d.name}</option>)}
+                </select>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Location *</label>
-                  <select required value={onboardingForm.locationId} onChange={e => setOnboardingForm({...onboardingForm, locationId: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}>
-                    <option value="" disabled>Select Location</option>
-                    {locations.map(d => <option key={d._id} value={d._id} style={{ color: '#000' }}>{d.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Shift *</label>
-                  <select required value={onboardingForm.shiftId} onChange={e => setOnboardingForm({...onboardingForm, shiftId: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}>
-                    <option value="" disabled>Select Shift</option>
-                    {shifts.map(d => <option key={d._id} value={d._id} style={{ color: '#000' }}>{d.name}</option>)}
-                  </select>
-                </div>
+                            {/* Skills & Experience */}
+              <div style={{ paddingBottom: '200px' }}>
+              <div style={{ marginTop: '10px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>Skills & Experience</h4>
+                {onboardingForm.skills.map((skill, index) => (
+                  <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Python" 
+                      required
+                      value={skill.name} 
+                      onChange={e => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills[index].name = e.target.value;
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ flex: 2, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
+                    />
+                    <select 
+                      value={skill.proficiency} 
+                      required
+                      onChange={e => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills[index].proficiency = e.target.value;
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ flex: 1.5, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}
+                    >
+                      <option value="Beginner" style={{ color: '#000' }}>Beginner</option>
+                      <option value="Intermediate" style={{ color: '#000' }}>Intermediate</option>
+                      <option value="Advanced" style={{ color: '#000' }}>Advanced</option>
+                      <option value="Expert" style={{ color: '#000' }}>Expert</option>
+                    </select>
+                    <input 
+                      type="number" 
+                      placeholder="Years" 
+                      min="0"
+                      required
+                      value={skill.yearsOfExperience} 
+                      onChange={e => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills[index].yearsOfExperience = Number(e.target.value);
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills.splice(index, 1);
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }}
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                ))}
+                <button 
+                  type="button" 
+                  className="btn btn-glass" 
+                  style={{ padding: '8px 16px', fontSize: '13px' }}
+                  onClick={() => setOnboardingForm({ ...onboardingForm, skills: [...onboardingForm.skills, { name: '', proficiency: 'Intermediate', yearsOfExperience: 1 }] })}
+                >
+                  + Add Skill
+                </button>
               </div>
-              
+
+              </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button type="button" onClick={() => setShowOnboardingModal(false)} className="btn btn-glass" style={{ padding: '10px 20px' }}>Cancel</button>
                 <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ padding: '10px 24px' }}>{isSubmitting ? 'Submitting...' : 'Onboard Employee'}</button>
@@ -1203,8 +1248,76 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Reason (Optional)</label>
                 <textarea value={offboardingForm.reason} onChange={e => setOffboardingForm({...offboardingForm, reason: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none', minHeight: '80px', fontFamily: 'inherit' }} placeholder="Provide a reason for offboarding..." />
               </div>
+                            {/* Skills & Experience */}
+              <div style={{ marginTop: '10px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>Skills & Experience</h4>
+                {onboardingForm.skills.map((skill, index) => (
+                  <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Python" 
+                      required
+                      value={skill.name} 
+                      onChange={e => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills[index].name = e.target.value;
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ flex: 2, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
+                    />
+                    <select 
+                      value={skill.proficiency} 
+                      required
+                      onChange={e => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills[index].proficiency = e.target.value;
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ flex: 1.5, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }}
+                    >
+                      <option value="Beginner" style={{ color: '#000' }}>Beginner</option>
+                      <option value="Intermediate" style={{ color: '#000' }}>Intermediate</option>
+                      <option value="Advanced" style={{ color: '#000' }}>Advanced</option>
+                      <option value="Expert" style={{ color: '#000' }}>Expert</option>
+                    </select>
+                    <input 
+                      type="number" 
+                      placeholder="Years" 
+                      min="0"
+                      required
+                      value={skill.yearsOfExperience} 
+                      onChange={e => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills[index].yearsOfExperience = Number(e.target.value);
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.03)', color: 'var(--color-text)', border: '1px solid var(--glass-border-light)', borderRadius: '12px', outline: 'none' }} 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const newSkills = [...onboardingForm.skills];
+                        newSkills.splice(index, 1);
+                        setOnboardingForm({ ...onboardingForm, skills: newSkills });
+                      }} 
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }}
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                ))}
+                <button 
+                  type="button" 
+                  className="btn btn-glass" 
+                  style={{ padding: '8px 16px', fontSize: '13px' }}
+                  onClick={() => setOnboardingForm({ ...onboardingForm, skills: [...onboardingForm.skills, { name: '', proficiency: 'Intermediate', yearsOfExperience: 1 }] })}
+                >
+                  + Add Skill
+                </button>
+              </div>
+
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
-                <button type="button" onClick={() => setShowOffboardingModal(false)} className="btn btn-glass" style={{ padding: '10px 20px' }}>Cancel</button>
+                <button type="button" onClick={() => setShowOnboardingModal(false)} className="btn btn-glass" style={{ padding: '10px 20px' }}>Cancel</button>
                 <button type="submit" disabled={isSubmitting} style={{ padding: '10px 24px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>{isSubmitting ? 'Processing...' : 'Confirm Offboarding'}</button>
               </div>
             </form>
@@ -1229,3 +1342,5 @@ const EmployeeManagementView: React.FC<EmployeeManagementViewProps> = ({ role, u
 };
 
 export default EmployeeManagementView;
+
+
