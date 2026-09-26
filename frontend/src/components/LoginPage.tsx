@@ -49,7 +49,24 @@ export default function LoginPage({ onLogin, theme, onThemeToggle }: { onLogin: 
       const { accessToken, refreshToken, user } = response.data.data;
       onLogin(accessToken, refreshToken, user);
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.error?.message || err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
+    setEmail(quickEmail);
+    setPassword(quickPass);
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await apiClient.post('/auth/login', { email: quickEmail, password: quickPass });
+      const { accessToken, refreshToken, user } = response.data.data;
+      onLogin(accessToken, refreshToken, user);
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message || err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -178,38 +195,67 @@ export default function LoginPage({ onLogin, theme, onThemeToggle }: { onLogin: 
                 </div>
               </form>
 
-              {import.meta.env.DEV && (
-                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--glass-border-light)' }}>
-                  <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', textAlign: 'center' }}>⚙️ Dev Mode Quick Login</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                {/* Always-Visible 1-Tap Demo Logins */}
+                <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--cutout-border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>bolt</span> 1-Tap Demo Login
+                    </p>
+                    <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', opacity: 0.8 }}>Click any role</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
                     <button 
                       type="button"
-                      onClick={() => { setEmail('admin@dev.com'); setPassword('Dev@1234'); setTimeout(() => document.getElementById('login-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })), 50); }} 
-                      style={{ flex: '1 1 calc(50% - 8px)', padding: '8px', fontSize: '12px', background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.3)', color: 'var(--color-ui-element)', borderRadius: '6px', cursor: 'pointer' }}
-                    >Super Admin</button>
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('hr@dev.com', 'Dev@1234')} 
+                      className="btn btn-glass"
+                      style={{ padding: '10px 8px', fontSize: '12.5px', fontWeight: 600, background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.35)', color: 'var(--color-ui-element)', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', transition: 'all 0.2s' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#8b5cf6' }}>groups</span>
+                      HR Manager
+                    </button>
                     <button 
                       type="button"
-                      onClick={() => { setEmail('hr@dev.com'); setPassword('Dev@1234'); setTimeout(() => document.getElementById('login-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })), 50); }} 
-                      style={{ flex: '1 1 calc(50% - 8px)', padding: '8px', fontSize: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', color: 'var(--color-ui-element)', borderRadius: '6px', cursor: 'pointer' }}
-                    >HR Manager</button>
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('admin@dev.com', 'Dev@1234')} 
+                      className="btn btn-glass"
+                      style={{ padding: '10px 8px', fontSize: '12.5px', fontWeight: 600, background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.35)', color: 'var(--color-ui-element)', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', transition: 'all 0.2s' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#10b981' }}>admin_panel_settings</span>
+                      Super Admin
+                    </button>
                     <button 
                       type="button"
-                      onClick={() => { setEmail('finance@dev.com'); setPassword('Dev@1234'); setTimeout(() => document.getElementById('login-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })), 50); }} 
-                      style={{ flex: '1 1 calc(50% - 8px)', padding: '8px', fontSize: '12px', background: 'rgba(236, 72, 153, 0.1)', border: '1px solid rgba(236, 72, 153, 0.3)', color: 'var(--color-ui-element)', borderRadius: '6px', cursor: 'pointer' }}
-                    >Finance Exec</button>
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('finance@dev.com', 'Dev@1234')} 
+                      className="btn btn-glass"
+                      style={{ padding: '10px 8px', fontSize: '12.5px', fontWeight: 600, background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.35)', color: 'var(--color-ui-element)', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', transition: 'all 0.2s' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#f59e0b' }}>account_balance</span>
+                      Finance Exec
+                    </button>
                     <button 
                       type="button"
-                      onClick={() => { setEmail('it@dev.com'); setPassword('Dev@1234'); setTimeout(() => document.getElementById('login-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })), 50); }} 
-                      style={{ flex: '1 1 calc(50% - 8px)', padding: '8px', fontSize: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', color: 'var(--color-ui-element)', borderRadius: '6px', cursor: 'pointer' }}
-                    >IT Admin</button>
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('it@dev.com', 'Dev@1234')} 
+                      className="btn btn-glass"
+                      style={{ padding: '10px 8px', fontSize: '12.5px', fontWeight: 600, background: 'rgba(236, 72, 153, 0.12)', border: '1px solid rgba(236, 72, 153, 0.35)', color: 'var(--color-ui-element)', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', transition: 'all 0.2s' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#ec4899' }}>computer</span>
+                      IT Admin
+                    </button>
                     <button 
                       type="button"
-                      onClick={() => { setEmail('employee@dev.com'); setPassword('Dev@1234'); setTimeout(() => document.getElementById('login-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })), 50); }} 
-                      style={{ width: '100%', padding: '8px', fontSize: '12px', background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.3)', color: 'var(--color-ui-element)', borderRadius: '6px', cursor: 'pointer', marginTop: '4px' }}
-                    >Standard Employee</button>
+                      disabled={isLoading}
+                      onClick={() => handleQuickLogin('employee@dev.com', 'Dev@1234')} 
+                      className="btn btn-glass"
+                      style={{ gridColumn: 'span 2', padding: '10px 8px', fontSize: '12.5px', fontWeight: 600, background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.35)', color: 'var(--color-ui-element)', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', transition: 'all 0.2s' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#38bdf8' }}>person</span>
+                      Standard Employee
+                    </button>
                   </div>
                 </div>
-              )}
             </div>
           </div>
         </section>
